@@ -44,4 +44,11 @@ spec:
             periodSeconds: 10
           envFrom:
             - secretRef:
-               name: myapp  
+               name: myapp 
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi 
