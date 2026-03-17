@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: finflow-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+  - host: ""
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: myapp     # kaunsi service?
+            port:
+              number: 80         # us service ka port?
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: finflow-backend-svc     # kaunsi service?
+            port: 
+              number: 80         # us service ka port?
