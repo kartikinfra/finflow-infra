@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata: 
+  name: psq-backend
+spec:
+  selector:
+   matchLabels:
+    app: finflow-backend
+  template:
+   metadata:
+    labels:
+     app: finflow-backend
+   spec:
+    containers:
+       - name: finflow-backend
+         image: kaka750/finflow-backend:v1
+         resources:
+          requests:
+           cpu: 100m
+         livenessProbe:
+           httpGet:
+            path: '/health'
+            port: 5000
+           initialDelaySeconds: 30
+         readinessProbe:
+            httpGet:
+             path: '/health'
+             port: 5000 
+            initialDelaySeconds: 10
+         ports:
+           - containerPort: 5000
+

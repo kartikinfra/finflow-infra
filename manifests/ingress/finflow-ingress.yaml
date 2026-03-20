@@ -13,13 +13,13 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: myapp     # kaunsi service?
+            name: finflow-frontend-svc     # kaunsi service?
             port:
-              number: 30000         # us service ka port?
+              number: 80        # us service ka port?
       - path: /api
         pathType: Prefix
         backend:
           service:
             name: finflow-backend-svc     # kaunsi service?
             port: 
-              number: 80         # us service ka port?
+              number: 5000         # us service ka port?
