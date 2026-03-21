@@ -24,7 +24,10 @@ spec:
             - name: POSTGRES_USER
               value: finflow_user
             - name: POSTGRES_PASSWORD
-              value: secret123
+              valueFrom:
+               secretKeyRef:
+                name: postgres-secrets
+                key: POSTGRES_PASSWORD
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
@@ -32,3 +35,4 @@ spec:
         - name: postgres-storage
           persistentVolumeClaim:
             claimName: postgres-pvc
+      
