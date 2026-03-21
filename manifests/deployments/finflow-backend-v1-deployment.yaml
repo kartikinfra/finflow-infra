@@ -13,7 +13,7 @@ spec:
    spec:
     containers:
        - name: finflow-backend
-         image: kaka750/finflow-backend:v1
+         image: kaka750/finflow-backend:v2
          resources:
           requests:
            cpu: 100m
@@ -29,4 +29,9 @@ spec:
             initialDelaySeconds: 10
          ports:
            - containerPort: 5000
+         envFrom:
+          - configMapRef:
+              name: postgres-config
+          - secretRef:
+              name: postgres-secrets
 
