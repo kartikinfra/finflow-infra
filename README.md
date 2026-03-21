@@ -1,20 +1,20 @@
-inflow-infra
-Kubernetes infrastructure for FinFlow — a fintech payments simulation built to production standards.
-Real incidents. Real root cause analysis. Real fixes.
+finflow-infra
+I love seeing through the kernel — the way K8s actually makes things happen underneath.
+This repo is where that curiosity meets production-grade infrastructure.
 
 What this is
-FinFlow is a 3-tier PERN stack (React + Node.js + PostgreSQL) running on Kubernetes — designed around the constraints of a real fintech environment.
-Every infrastructure decision here is made with business consequences in mind:
+FinFlow is a fintech payments simulation — a 3-tier PERN stack (React + Node.js + PostgreSQL) running on Kubernetes, built to the same standards I'd apply to a real system.
+Every infrastructure decision here has a business consequence attached to it:
 
 Hardcoded secrets = compliance failure
 Missing resource limits = no autoscaling under load
 Lost PVC = transaction history gone
 Wrong image tag = silent rollback, payments down
 
-This isn't a demo app. It's an infrastructure that gets broken, diagnosed, and fixed — the same way it would in production.
+This isn't a demo. It gets broken, diagnosed, and fixed — the same way it happens in production.
 
 Stack
-LayerToolOrchestrationKubernetes — Rancher DesktopIngressTraefikAppReact (Vite) + Node.js + ExpressDatabasePostgreSQL 15 + PVC (local-path)AutoscalingHPA (CPU-based)ConfigConfigMap + K8s SecretsMonitoringPrometheus + Grafana (Week 3)Runtime SecurityFalco (Week 3)Cost VisibilityKubecost (Week 3)GitOpsArgoCD (Month 2)BackupVelero (Month 2)
+LayerToolOrchestrationKubernetes — Rancher DesktopIngressTraefikAppReact (Vite) + Node.js + ExpressDatabasePostgreSQL 15 + PVCAutoscalingHPA — CPU basedConfigConfigMap + K8s SecretsMonitoringPrometheus + Grafana (Week 3)Runtime SecurityFalco (Week 3)Cost VisibilityKubecost (Week 3)GitOpsArgoCD (Month 2)BackupVelero (Month 2)Deep ObservabilityeBPF — bpftrace, Cilium, Tetragon (Month 10+)
 
 Repo structure
 finflow-infra/
@@ -50,16 +50,16 @@ STORAGE
   postgres-pvc    1Gi    Bound    local-path
 
 Incidents
-#What brokeRoot causeFix1Ingress routing to wrong serviceTwo wildcard rules — Traefik picks silentlyExplicit path rules, removed duplicate2HPA showing <unknown> CPUresources.requests missing in specAdded CPU requests to all deployments3DB credentials in Git historyPOSTGRES_PASSWORD hardcoded in YAMLK8s Secret + secretKeyRef4/api/transactions 404 after updateStale image tag caused silent rollbackFixed image tag — YAML is source of truth
-Detailed writeups in /docs.
+#What brokeRoot causeFix1Ingress routing to wrong serviceTwo wildcard rules — Traefik picks silentlyExplicit path rules, removed duplicate2HPA showing <unknown> CPUresources.requests missing in specAdded CPU requests to all deployments3DB credentials in GitPOSTGRES_PASSWORD hardcoded in YAMLK8s Secret + secretKeyRef4/api/transactions 404 after updateStale image tag caused silent rollbackFixed image tag — YAML is source of truth
+Full writeups in /docs.
 
 Architecture
 Browser
    │
    ▼
 Traefik Ingress
-   ├── /        → finflow-frontend (React)
-   └── /api     → psq-backend (Node.js)
+   ├── /        →  finflow-frontend (React)
+   └── /api     →  psq-backend (Node.js)
                         │
                         ▼
                   postgres-svc (ClusterIP)
