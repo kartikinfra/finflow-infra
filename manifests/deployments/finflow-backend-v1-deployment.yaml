@@ -34,4 +34,10 @@ spec:
               name: postgres-config
           - secretRef:
               name: postgres-secrets
-
+         resources:
+           requests:
+             cpu: 100m
+             memory: 30Mi
+           limits:
+             cpu: 300m
+             memory: 60Mi

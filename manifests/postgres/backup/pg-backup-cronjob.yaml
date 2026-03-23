@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
  name: pg-backup-cronjob
 spec:
- schedule: "*/2 * * * *"
+ schedule: "* * */2 * *"
  jobTemplate:
    spec:
     template: 
