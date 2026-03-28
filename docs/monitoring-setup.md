@@ -57,4 +57,4 @@ Set panel unit to `MB`. Values now display as `~30 MB`, `~25 MB`,
 `rate()` applies to counters (values that only increase — CPU seconds, 
 request totals). Gauges (memory, restart current state) are queried 
 directly. Mixing them up produces either wrong data or no data.
-![Dashboard](docs/assets/dashboard-1.png)
+![Dashboard](assets/dashboard-1.png)
