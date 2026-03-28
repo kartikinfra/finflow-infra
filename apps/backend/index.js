@@ -7,37 +7,48 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ✅ Updated DB config (NO fallback mistakes)
 const pool = new Pool({
-  host: process.env.DB_HOST || "postgres-svc",
-  database: process.env.DB_NAME || "finflow",
-  user: process.env.DB_USER || "finflow_user",
+  host: process.env.DB_HOST || "postgres-db-svc",
+  database: process.env.DB_NAME || "kartik_db",
+  user: process.env.DB_USER || "kartik",
   password: process.env.DB_PASSWORD || "secret123",
-  port: 5432,
+  port: process.env.DB_PORT || 5432,
 });
 
+// 🔍 Health check (for probes)
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-app.get("/transactions", async (req, res) => {
+// 🔍 Readiness check (DB connection)
+app.get("/ready", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM transactions LIMIT 10;");
-    res.json(result.rows);
+    await pool.query("SELECT 1");
+    res.sendStatus(200);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("DB NOT READY:", err);
+    res.sendStatus(500);
   }
 });
 
+// 📦 Get transactions
 app.get("/api/transactions", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM transactions LIMIT 10;");
+    const result = await pool.query(
+      "SELECT id, amount, description FROM transactions LIMIT 10;"
+    );
     res.json(result.rows);
   } catch (err) {
+    console.error("DB ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-
+// 🧪 Optional root route
+app.get("/", (req, res) => {
+  res.send("FinFlow backend running 🚀");
+});
 
 app.listen(5000, () => {
   console.log("FinFlow backend running on port 5000");
