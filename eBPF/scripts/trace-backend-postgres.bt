@@ -1,0 +1,7 @@
+// FinFlow Backend → Postgres TCP Connection Tracer
+// Usage: sudo bpftrace trace-backend-postgres.bt
+// Get backend PID: ps aux | grep node
+
+tracepoint:syscalls:sys_enter_connect /pid == $1/ {
+    printf("%s (pid:%d) -> postgres\n", comm, pid);
+}
