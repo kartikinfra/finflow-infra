@@ -4,3 +4,15 @@ customRules:
       condition: or container.name contains "k8s_grafana-sc"
       override:
         condition: append
+    - rule: postgres-shell-exec-detection
+      desc: Detect shell execution inside postgres container
+      condition: >
+        spawned_process
+        and proc.name in (bash, sh, zsh)
+        and container
+        and container.image.repository contains "postgres"
+      output: >
+        Postgres container shell detected |
+        process=%proc.name cmd=%proc.cmdline container=%container.name
+      priority: CRITICAL
+      tags: [postgres, security, k8s]
