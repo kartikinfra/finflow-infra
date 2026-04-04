@@ -1,7 +1,7 @@
 customRules:
   falco_rules.local.yaml: |-
     - macro: user_known_contact_k8s_api_server_activities
-      condition: or container.name contains "k8s_grafana-sc"
+      condition: or container.name contains "grafana-sc-datasources"
       override:
         condition: append
     - rule: postgres-shell-exec-detection
@@ -16,3 +16,8 @@ customRules:
         process=%proc.name cmd=%proc.cmdline container=%container.name
       priority: CRITICAL
       tags: [postgres, security, k8s]
+falco:
+  json_output: true
+  http_output:
+    enabled: true
+    url: http://falcosidekick.monitoring.svc.cluster.local:2801
