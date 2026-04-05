@@ -16,6 +16,16 @@ customRules:
         process=%proc.name cmd=%proc.cmdline container=%container.name
       priority: CRITICAL
       tags: [postgres, security, k8s]
+    - rule: outbound-rule-no-unathorized-trafic-can-come-insidethePod
+      desc: outbound traffic detected from container
+      condition: >
+        outbound
+        and container
+        and not container.name contains "coredns"
+      output: >
+        container outbound network detected |
+        connection=%fd.name process=%proc.name
+      priority: WARNING
 falco:
   json_output: true
   http_output:
