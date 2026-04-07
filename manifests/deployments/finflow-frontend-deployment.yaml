@@ -11,6 +11,7 @@ spec:
      labels:
        app: finflow-frontend
     spec:
+     serviceAccountName: svc-acc-frontend
      containers:
      - name: finflow-frontend
        image: kaka750/finflow-frontend:v1

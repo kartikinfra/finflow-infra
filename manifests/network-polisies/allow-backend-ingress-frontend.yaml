@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-backend-ingress-frontend
+spec:
+  podSelector:
+    matchLabels:
+      app: finflow-backend
+  policyTypes:
+   - Ingress
+  ingress: 
+    - from: 
+      - podSelector:
+          matchLabels:
+             app: finflow-frontend
+      ports:
+       - port: 5000
