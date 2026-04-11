@@ -36,7 +36,7 @@ app.get("/ready", async (req, res) => {
 app.get("/api/transactions", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT id, amount, description FROM transactions LIMIT 10;"
+      "SELECT id, amount, description, created_at FROM transactions LIMIT 10;"
     );
     res.json(result.rows);
   } catch (err) {

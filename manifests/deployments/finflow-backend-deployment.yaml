@@ -1,7 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment 
 metadata: 
-  name: psq-backend
+  name: finflow-backend
+  namespace: finflow
 spec:
   selector:
    matchLabels:
@@ -11,13 +12,9 @@ spec:
     labels:
      app: finflow-backend
    spec:
-    serviceAccountName: svc-acc-backend
     containers:
        - name: finflow-backend
-         image: kaka750/finflow-backend:v2
-         resources:
-          requests:
-           cpu: 100m
+         image: kaka750/finflow-backend:v5-arm
          livenessProbe:
            httpGet:
             path: '/health'

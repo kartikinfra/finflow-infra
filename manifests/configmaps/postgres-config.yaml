@@ -1,0 +1,9 @@
+apiVersion: v1 
+kind: ConfigMap 
+metadata:
+   name: postgres-config
+   namespace: finflow
+data:  
+    DB_HOST: postgres-svc
+    DB_NAME: finflow
+    DB_USER: finflow_user

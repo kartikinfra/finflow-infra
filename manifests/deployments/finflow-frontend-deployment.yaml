@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment 
 metadata: 
  name: finflow-frontend
+ namespace: finflow
 spec: 
   selector:
    matchLabels:
@@ -11,10 +12,10 @@ spec:
      labels:
        app: finflow-frontend
     spec:
-     serviceAccountName: svc-acc-frontend
+    
      containers:
      - name: finflow-frontend
-       image: kaka750/finflow-frontend:v1
+       image: kaka750/finflow-frontend:v5-arm
        resources:
          requests:
            cpu: 100m
