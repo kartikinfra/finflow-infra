@@ -4,6 +4,7 @@ grafana:
       enabled: true
       org_role: Viewer
       org_name: Main Org.
+
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
@@ -14,333 +15,119 @@ grafana:
           disableDeletion: false
           options:
             path: /var/lib/grafana/dashboards/default
+
   dashboards:
     default:
       finflow:
         json: |
-         {
-  "annotations": {
-    "list": [
-      {
-        "builtIn": 1,
-        "datasource": {
-          "type": "grafana",
-          "uid": "-- Grafana --"
-        },
-        "enable": true,
-        "hide": true,
-        "iconColor": "rgba(0, 211, 255, 1)",
-        "name": "Annotations & Alerts",
-        "type": "dashboard"
-      }
-    ]
-  },
-  "editable": true,
-  "fiscalYearStartMonth": 0,
-  "graphTooltip": 0,
-  "links": [],
-  "panels": [
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
+          {
+            "annotations": {
+              "list": [
+                {
+                  "builtIn": 1,
+                  "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                  },
+                  "enable": true,
+                  "hide": true,
+                  "iconColor": "rgba(0, 211, 255, 1)",
+                  "name": "Annotations & Alerts",
+                  "type": "dashboard"
+                }
+              ]
             },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
+            "editable": true,
+            "panels": [
+
               {
-                "color": "green",
-                "value": 0
+                "id": 1,
+                "title": "FinFlow — Pod Restarts (last 5m)",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "targets": [
+                  {
+                    "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"finflow\", pod=~\"finflow.*\"}[5m])",
+                    "refId": "A"
+                  }
+                ],
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
               },
+
               {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 0
-      },
-      "id": 3,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "kube_pod_container_status_restarts_total{namespace=\"default\"}",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "FinFlow — Pod Restarts",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
+                "id": 2,
+                "title": "FinFlow — CPU Usage (per pod)",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "targets": [
+                  {
+                    "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"finflow\", pod=~\"finflow.*\"}[5m])) by (pod)",
+                    "refId": "A"
+                  }
+                ],
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
               },
+
               {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "id": 1,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "rate(container_cpu_usage_seconds_total{namespace=\"default\"}[5m])",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "FinFlow - CPU Usage",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
+                "id": 3,
+                "title": "FinFlow — Memory Usage (MB)",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "targets": [
+                  {
+                    "expr": "container_memory_working_set_bytes{namespace=\"finflow\", pod=~\"finflow.*\"} / 1024 / 1024",
+                    "refId": "A"
+                  }
+                ],
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
               },
+
               {
-                "color": "red",
-                "value": 80
+                "id": 4,
+                "title": "FinFlow — CPU % of Limit",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "targets": [
+                  {
+                    "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"finflow\", pod=~\"finflow.*\"}[5m])) / sum(kube_pod_container_resource_limits_cpu_cores{namespace=\"finflow\", pod=~\"finflow.*\"})",
+                    "refId": "A"
+                  }
+                ],
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+              },
+
+              {
+                "id": 5,
+                "title": "FinFlow — Memory % of Limit",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "targets": [
+                  {
+                    "expr": "sum(container_memory_working_set_bytes{namespace=\"finflow\", pod=~\"finflow.*\"}) / sum(kube_pod_container_resource_limits_memory_bytes{namespace=\"finflow\", pod=~\"finflow.*\"})",
+                    "refId": "A"
+                  }
+                ],
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 }
+              },
+
+              {
+                "id": 6,
+                "title": "FinFlow — Pod Status",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "targets": [
+                  {
+                    "expr": "kube_pod_status_phase{namespace=\"finflow\", pod=~\"finflow.*\"}",
+                    "refId": "A"
+                  }
+                ],
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 }
               }
-            ]
+
+            ],
+            "schemaVersion": 42,
+            "title": "FinFlow Monitoring",
+            "uid": "finflow-dashboard",
+            "version": 1,
+            "time": { "from": "now-15m", "to": "now" }
           }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 8
-      },
-      "id": 2,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.4.2",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "container_memory_working_set_bytes{namespace=\"default\"} /1024/ 1024",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "FinFlow — Memory Usage",
-      "type": "timeseries"
-    }
-  ],
-  "preload": false,
-  "schemaVersion": 42,
-  "tags": [],
-  "templating": {
-    "list": []
-  },
-  "time": {
-    "from": "now-5m",
-    "to": "now"
-  },
-  "timepicker": {},
-  "timezone": "browser",
-  "title": "FinFlow Monitoring",
-  "uid": "ad5drsw",
-  "version": 6,
-  "weekStart": ""
-}
