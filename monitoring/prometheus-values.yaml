@@ -1,0 +1,25 @@
+alertmanager:
+  enabled: true
+  config:
+    global:
+      slack_api_url: 'YOUR_WEBHOOK_URL'
+    route:
+      receiver: slack
+      group_by: ['alertname']
+      group_wait: 10s
+      group_interval: 5m
+      repeat_interval: 1h
+    receivers:
+    - name: slack
+      slack_configs:
+      - channel: '#general'
+        send_resolved: true
+    - name: 'null'
+grafana:
+  enabled: true
+prometheus:
+  prometheusSpec:
+    retention: 24h
+    resources:
+      requests:
+        memory: 512Mi
