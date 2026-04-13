@@ -2,13 +2,14 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: frontend-hpa
+  namespace: finflow
 spec:
    scaleTargetRef:
      apiVersion: apps/v1 
      kind: Deployment 
      name: finflow-frontend
    minReplicas: 1
-   maxReplicas: 3
+   maxReplicas: 2
    metrics:
    - type: Resource
      resource:
