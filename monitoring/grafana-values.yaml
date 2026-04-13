@@ -89,7 +89,7 @@ grafana:
                 "datasource": { "type": "prometheus", "uid": "prometheus" },
                 "targets": [
                   {
-                    "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"finflow\", pod=~\"finflow.*\"}[5m])) / sum(kube_pod_container_resource_limits_cpu_cores{namespace=\"finflow\", pod=~\"finflow.*\"})",
+                    "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"finflow\", pod=~\"finflow.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"finflow\", pod=~\"finflow.*\", resource=\"cpu\"}) * 100",
                     "refId": "A"
                   }
                 ],
@@ -103,7 +103,7 @@ grafana:
                 "datasource": { "type": "prometheus", "uid": "prometheus" },
                 "targets": [
                   {
-                    "expr": "sum(container_memory_working_set_bytes{namespace=\"finflow\", pod=~\"finflow.*\"}) / sum(kube_pod_container_resource_limits_memory_bytes{namespace=\"finflow\", pod=~\"finflow.*\"})",
+                    "expr": "sum(container_memory_working_set_bytes{namespace=\"finflow\", pod=~\"finflow.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"finflow\",pod=~\"finflow.*\",resource=\"memory\"}) * 100",
                     "refId": "A"
                   }
                 ],
