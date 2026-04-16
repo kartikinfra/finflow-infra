@@ -14,7 +14,7 @@ spec:
    spec:
     containers:
        - name: finflow-backend
-         image: kaka750/finflow-backend:v5-arm
+         image: kaka750/finflow-backend:v6-arm
          livenessProbe:
            httpGet:
             path: '/health'
