@@ -15,6 +15,11 @@ grafana:
           disableDeletion: false
           options:
             path: /var/lib/grafana/dashboards/default
+  additionalDataSources:
+    - name: tempo
+      type: tempo
+      uid: ffj1etsw8c2kgc
+      url: http://tempo.monitoring.svc.cluster.local:3200
 
   dashboards:
     default:
@@ -38,96 +43,663 @@ grafana:
               ]
             },
             "editable": true,
+            "fiscalYearStartMonth": 0,
+            "graphTooltip": 0,
+            "links": [],
             "panels": [
-
               {
-                "id": 1,
-                "title": "FinFlow — Pod Restarts (last 5m)",
-                "type": "timeseries",
-                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "datasource": {
+                  "uid": "ffj1etsw8c2kgc"
+                },
+                "fieldConfig": {
+                  "defaults": {
+                    "color": {
+                      "mode": "thresholds"
+                    },
+                    "custom": {
+                      "align": "auto",
+                      "cellOptions": {
+                        "type": "auto"
+                      },
+                      "footer": {
+                        "reducers": []
+                      },
+                      "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": 0
+                        },
+                        {
+                          "color": "red",
+                          "value": 80
+                        }
+                      ]
+                    }
+                  },
+                  "overrides": []
+                },
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 0
+                },
+                "id": 7,
+                "options": {
+                  "cellHeight": "sm",
+                  "showHeader": true,
+                  "sortBy": [
+                    {
+                      "desc": false,
+                      "displayName": "Name"
+                    }
+                  ]
+                },
+                "pluginVersion": "12.4.2",
                 "targets": [
                   {
-                    "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"finflow\", pod=~\"finflow.*\"}[5m])",
-                    "refId": "A"
+                    "filters": [
+                      {
+                        "id": "97210c96",
+                        "operator": "=",
+                        "scope": "span"
+                      },
+                      {
+                        "id": "service-name",
+                        "isCustomValue": false,
+                        "operator": "=",
+                        "scope": "resource",
+                        "tag": "service.name",
+                        "value": ["finflow-backend"],
+                        "valueType": "string"
+                      },
+                      {
+                        "id": "span-name",
+                        "isCustomValue": false,
+                        "operator": "=",
+                        "scope": "span",
+                        "tag": "name",
+                        "value": ["request handler - /api/transactions"],
+                        "valueType": "string"
+                      }
+                    ],
+                    "limit": 20,
+                    "metricsQueryType": "range",
+                    "queryType": "traceqlSearch",
+                    "refId": "A",
+                    "serviceMapUseNativeHistograms": false,
+                    "tableType": "traces"
                   }
                 ],
-                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+                "title": "API Transactions Traces",
+                "type": "table"
               },
-
               {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "fieldConfig": {
+                  "defaults": {
+                    "color": {
+                      "mode": "palette-classic"
+                    },
+                    "custom": {
+                      "axisBorderShow": false,
+                      "axisCenteredZero": false,
+                      "axisColorMode": "text",
+                      "axisLabel": "",
+                      "axisPlacement": "auto",
+                      "barAlignment": 0,
+                      "barWidthFactor": 0.6,
+                      "drawStyle": "line",
+                      "fillOpacity": 0,
+                      "gradientMode": "none",
+                      "hideFrom": {
+                        "legend": false,
+                        "tooltip": false,
+                        "viz": false
+                      },
+                      "insertNulls": false,
+                      "lineInterpolation": "linear",
+                      "lineWidth": 1,
+                      "pointSize": 5,
+                      "scaleDistribution": {
+                        "type": "linear"
+                      },
+                      "showPoints": "auto",
+                      "showValues": false,
+                      "spanNulls": false,
+                      "stacking": {
+                        "group": "A",
+                        "mode": "none"
+                      },
+                      "thresholdsStyle": {
+                        "mode": "off"
+                      }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": 0
+                        },
+                        {
+                          "color": "red",
+                          "value": 80
+                        }
+                      ]
+                    }
+                  },
+                  "overrides": []
+                },
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 0
+                },
                 "id": 2,
-                "title": "FinFlow — CPU Usage (per pod)",
-                "type": "timeseries",
-                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "options": {
+                  "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                  },
+                  "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                  }
+                },
+                "pluginVersion": "12.4.2",
                 "targets": [
                   {
                     "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"finflow\", pod=~\"finflow.*\"}[5m])) by (pod)",
                     "refId": "A"
                   }
                 ],
-                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+                "title": "FinFlow — CPU Usage (per pod)",
+                "type": "timeseries"
               },
-
               {
-                "id": 3,
-                "title": "FinFlow — Memory Usage (MB)",
-                "type": "timeseries",
-                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "fieldConfig": {
+                  "defaults": {
+                    "color": {
+                      "mode": "palette-classic"
+                    },
+                    "custom": {
+                      "axisBorderShow": false,
+                      "axisCenteredZero": false,
+                      "axisColorMode": "text",
+                      "axisLabel": "",
+                      "axisPlacement": "auto",
+                      "barAlignment": 0,
+                      "barWidthFactor": 0.6,
+                      "drawStyle": "line",
+                      "fillOpacity": 0,
+                      "gradientMode": "none",
+                      "hideFrom": {
+                        "legend": false,
+                        "tooltip": false,
+                        "viz": false
+                      },
+                      "insertNulls": false,
+                      "lineInterpolation": "linear",
+                      "lineWidth": 1,
+                      "pointSize": 5,
+                      "scaleDistribution": {
+                        "type": "linear"
+                      },
+                      "showPoints": "auto",
+                      "showValues": false,
+                      "spanNulls": false,
+                      "stacking": {
+                        "group": "A",
+                        "mode": "none"
+                      },
+                      "thresholdsStyle": {
+                        "mode": "off"
+                      }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": 0
+                        },
+                        {
+                          "color": "red",
+                          "value": 80
+                        }
+                      ]
+                    }
+                  },
+                  "overrides": []
+                },
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 8
+                },
+                "id": 1,
+                "options": {
+                  "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                  },
+                  "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                  }
+                },
+                "pluginVersion": "12.4.2",
                 "targets": [
                   {
-                    "expr": "container_memory_working_set_bytes{namespace=\"finflow\", pod=~\"finflow.*\"} / 1024 / 1024",
+                    "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"finflow\", pod=~\"finflow.*\"}[5m])",
                     "refId": "A"
                   }
                 ],
-                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+                "title": "FinFlow — Pod Restarts (last 5m)",
+                "type": "timeseries"
               },
-
               {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "fieldConfig": {
+                  "defaults": {
+                    "color": {
+                      "mode": "palette-classic"
+                    },
+                    "custom": {
+                      "axisBorderShow": false,
+                      "axisCenteredZero": false,
+                      "axisColorMode": "text",
+                      "axisLabel": "",
+                      "axisPlacement": "auto",
+                      "barAlignment": 0,
+                      "barWidthFactor": 0.6,
+                      "drawStyle": "line",
+                      "fillOpacity": 0,
+                      "gradientMode": "none",
+                      "hideFrom": {
+                        "legend": false,
+                        "tooltip": false,
+                        "viz": false
+                      },
+                      "insertNulls": false,
+                      "lineInterpolation": "linear",
+                      "lineWidth": 1,
+                      "pointSize": 5,
+                      "scaleDistribution": {
+                        "type": "linear"
+                      },
+                      "showPoints": "auto",
+                      "showValues": false,
+                      "spanNulls": false,
+                      "stacking": {
+                        "group": "A",
+                        "mode": "none"
+                      },
+                      "thresholdsStyle": {
+                        "mode": "off"
+                      }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": 0
+                        },
+                        {
+                          "color": "red",
+                          "value": 80
+                        }
+                      ]
+                    }
+                  },
+                  "overrides": []
+                },
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 8
+                },
                 "id": 4,
-                "title": "FinFlow — CPU % of Limit",
-                "type": "timeseries",
-                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "options": {
+                  "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                  },
+                  "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                  }
+                },
+                "pluginVersion": "12.4.2",
                 "targets": [
                   {
                     "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"finflow\", pod=~\"finflow.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"finflow\", pod=~\"finflow.*\", resource=\"cpu\"}) * 100",
                     "refId": "A"
                   }
                 ],
-                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+                "title": "FinFlow — CPU % of Limit",
+                "type": "timeseries"
               },
-
               {
-                "id": 5,
-                "title": "FinFlow — Memory % of Limit",
-                "type": "timeseries",
-                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "fieldConfig": {
+                  "defaults": {
+                    "color": {
+                      "mode": "palette-classic"
+                    },
+                    "custom": {
+                      "axisBorderShow": false,
+                      "axisCenteredZero": false,
+                      "axisColorMode": "text",
+                      "axisLabel": "",
+                      "axisPlacement": "auto",
+                      "barAlignment": 0,
+                      "barWidthFactor": 0.6,
+                      "drawStyle": "line",
+                      "fillOpacity": 0,
+                      "gradientMode": "none",
+                      "hideFrom": {
+                        "legend": false,
+                        "tooltip": false,
+                        "viz": false
+                      },
+                      "insertNulls": false,
+                      "lineInterpolation": "linear",
+                      "lineWidth": 1,
+                      "pointSize": 5,
+                      "scaleDistribution": {
+                        "type": "linear"
+                      },
+                      "showPoints": "auto",
+                      "showValues": false,
+                      "spanNulls": false,
+                      "stacking": {
+                        "group": "A",
+                        "mode": "none"
+                      },
+                      "thresholdsStyle": {
+                        "mode": "off"
+                      }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": 0
+                        },
+                        {
+                          "color": "red",
+                          "value": 80
+                        }
+                      ]
+                    }
+                  },
+                  "overrides": []
+                },
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 16
+                },
+                "id": 3,
+                "options": {
+                  "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                  },
+                  "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                  }
+                },
+                "pluginVersion": "12.4.2",
                 "targets": [
                   {
-                    "expr": "sum(container_memory_working_set_bytes{namespace=\"finflow\", pod=~\"finflow.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"finflow\",pod=~\"finflow.*\",resource=\"memory\"}) * 100",
+                    "expr": "container_memory_working_set_bytes{namespace=\"finflow\", pod=~\"finflow.*\"} / 1024 / 1024",
                     "refId": "A"
                   }
                 ],
-                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 }
+                "title": "FinFlow — Memory Usage (MB)",
+                "type": "timeseries"
               },
-
               {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "fieldConfig": {
+                  "defaults": {
+                    "color": {
+                      "mode": "palette-classic"
+                    },
+                    "custom": {
+                      "axisBorderShow": false,
+                      "axisCenteredZero": false,
+                      "axisColorMode": "text",
+                      "axisLabel": "",
+                      "axisPlacement": "auto",
+                      "barAlignment": 0,
+                      "barWidthFactor": 0.6,
+                      "drawStyle": "line",
+                      "fillOpacity": 0,
+                      "gradientMode": "none",
+                      "hideFrom": {
+                        "legend": false,
+                        "tooltip": false,
+                        "viz": false
+                      },
+                      "insertNulls": false,
+                      "lineInterpolation": "linear",
+                      "lineWidth": 1,
+                      "pointSize": 5,
+                      "scaleDistribution": {
+                        "type": "linear"
+                      },
+                      "showPoints": "auto",
+                      "showValues": false,
+                      "spanNulls": false,
+                      "stacking": {
+                        "group": "A",
+                        "mode": "none"
+                      },
+                      "thresholdsStyle": {
+                        "mode": "off"
+                      }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": 0
+                        },
+                        {
+                          "color": "red",
+                          "value": 80
+                        }
+                      ]
+                    }
+                  },
+                  "overrides": []
+                },
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 12,
+                  "y": 16
+                },
                 "id": 6,
-                "title": "FinFlow — Pod Status",
-                "type": "timeseries",
-                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "options": {
+                  "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                  },
+                  "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                  }
+                },
+                "pluginVersion": "12.4.2",
                 "targets": [
                   {
                     "expr": "kube_pod_status_phase{namespace=\"finflow\", pod=~\"finflow.*\"}",
                     "refId": "A"
                   }
                 ],
-                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 }
+                "title": "FinFlow — Pod Status",
+                "type": "timeseries"
+              },
+              {
+                "datasource": {
+                  "type": "prometheus",
+                  "uid": "prometheus"
+                },
+                "fieldConfig": {
+                  "defaults": {
+                    "color": {
+                      "mode": "palette-classic"
+                    },
+                    "custom": {
+                      "axisBorderShow": false,
+                      "axisCenteredZero": false,
+                      "axisColorMode": "text",
+                      "axisLabel": "",
+                      "axisPlacement": "auto",
+                      "barAlignment": 0,
+                      "barWidthFactor": 0.6,
+                      "drawStyle": "line",
+                      "fillOpacity": 0,
+                      "gradientMode": "none",
+                      "hideFrom": {
+                        "legend": false,
+                        "tooltip": false,
+                        "viz": false
+                      },
+                      "insertNulls": false,
+                      "lineInterpolation": "linear",
+                      "lineWidth": 1,
+                      "pointSize": 5,
+                      "scaleDistribution": {
+                        "type": "linear"
+                      },
+                      "showPoints": "auto",
+                      "showValues": false,
+                      "spanNulls": false,
+                      "stacking": {
+                        "group": "A",
+                        "mode": "none"
+                      },
+                      "thresholdsStyle": {
+                        "mode": "off"
+                      }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "green",
+                          "value": 0
+                        },
+                        {
+                          "color": "red",
+                          "value": 80
+                        }
+                      ]
+                    }
+                  },
+                  "overrides": []
+                },
+                "gridPos": {
+                  "h": 8,
+                  "w": 12,
+                  "x": 0,
+                  "y": 24
+                },
+                "id": 5,
+                "options": {
+                  "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                  },
+                  "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                  }
+                },
+                "pluginVersion": "12.4.2",
+                "targets": [
+                  {
+                    "expr": "sum(container_memory_working_set_bytes{namespace=\"finflow\", pod=~\"finflow.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"finflow\",pod=~\"finflow.*\",resource=\"memory\"}) * 100",
+                    "refId": "A"
+                  }
+                ],
+                "title": "FinFlow — Memory % of Limit",
+                "type": "timeseries"
               }
-
             ],
+            "preload": false,
             "schemaVersion": 42,
+            "tags": [],
+            "templating": {
+              "list": []
+            },
+            "time": {
+              "from": "now-15m",
+              "to": "now"
+            },
+            "timepicker": {},
+            "timezone": "browser",
             "title": "FinFlow Monitoring",
             "uid": "finflow-dashboard",
             "version": 1,
-            "time": { "from": "now-15m", "to": "now" }
+            "weekStart": ""
           }

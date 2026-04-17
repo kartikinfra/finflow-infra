@@ -1,0 +1,135 @@
+grafana:
+  grafana.ini:
+    auth.anonymous:
+      enabled: true
+      org_role: Viewer
+      org_name: Main Org.
+
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: default
+          folder: ''
+          type: file
+          disableDeletion: false
+          options:
+            path: /var/lib/grafana/dashboards/default
+
+  dashboards:
+    default:
+      finflow:
+        json: |
+          {
+            "annotations": {
+              "list": [
+                {
+                  "builtIn": 1,
+                  "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                  },
+                  "enable": true,
+                  "hide": true,
+                  "iconColor": "rgba(0, 211, 255, 1)",
+                  "name": "Annotations & Alerts",
+                  "type": "dashboard"
+                }
+              ]
+            },
+            "editable": true,
+            "panels": [
+
+              {
+                "id": 1,
+                "title": "FinFlow — Pod Restarts (last 5m)",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "targets": [
+                  {
+                    "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"finflow\", pod=~\"finflow.*\"}[5m])",
+                    "refId": "A"
+                  }
+                ],
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+              },
+
+              {
+                "id": 2,
+                "title": "FinFlow — CPU Usage (per pod)",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "targets": [
+                  {
+                    "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"finflow\", pod=~\"finflow.*\"}[5m])) by (pod)",
+                    "refId": "A"
+                  }
+                ],
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+              },
+
+              {
+                "id": 3,
+                "title": "FinFlow — Memory Usage (MB)",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "targets": [
+                  {
+                    "expr": "container_memory_working_set_bytes{namespace=\"finflow\", pod=~\"finflow.*\"} / 1024 / 1024",
+                    "refId": "A"
+                  }
+                ],
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+              },
+
+              {
+                "id": 4,
+                "title": "FinFlow — CPU % of Limit",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "targets": [
+                  {
+                    "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"finflow\", pod=~\"finflow.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"finflow\", pod=~\"finflow.*\", resource=\"cpu\"}) * 100",
+                    "refId": "A"
+                  }
+                ],
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+              },
+
+              {
+                "id": 5,
+                "title": "FinFlow — Memory % of Limit",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "targets": [
+                  {
+                    "expr": "sum(container_memory_working_set_bytes{namespace=\"finflow\", pod=~\"finflow.*\"}) / sum(kube_pod_container_resource_limits{namespace=\"finflow\",pod=~\"finflow.*\",resource=\"memory\"}) * 100",
+                    "refId": "A"
+                  }
+                ],
+                "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 }
+              },
+
+              {
+                "id": 6,
+                "title": "FinFlow — Pod Status",
+                "type": "timeseries",
+                "datasource": { "type": "prometheus", "uid": "prometheus" },
+                "targets": [
+                  {
+                    "expr": "kube_pod_status_phase{namespace=\"finflow\", pod=~\"finflow.*\"}",
+                    "refId": "A"
+                  }
+                ],
+                "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 }
+              }
+
+            ],
+            "schemaVersion": 42,
+            "title": "FinFlow Monitoring",
+            "uid": "finflow-dashboard",
+            "version": 1,
+            "time": { "from": "now-15m", "to": "now" }
+                               
+          }
+          
