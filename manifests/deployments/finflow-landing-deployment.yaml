@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: finflow-landing
+  namespace: finflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels: 
+         app: finflow-landing
+  template:
+     metadata:
+       labels:
+         app: finflow-landing
+     spec:
+       containers:
+        - name: finflow-landing
+          image: kaka750/finflow-landing:v1-api
+          ports:
+           - containerPort: 80
+
+     
