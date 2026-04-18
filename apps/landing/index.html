@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FinFlow — Incident Intelligence</title>
+
+<!-- Preconnect -->
+<link rel="preconnect" href="https://cdn.tailwindcss.com">
+<link rel="preconnect" href="https://unpkg.com">
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter','system-ui','sans-serif']
+        }
+      }
+    }
+  }
+</script>
+
+<!-- Theme boot (no flicker) -->
+<script>
+  const t = localStorage.getItem('theme');
+  if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  }
+</script>
+
+</head>
+
+<body class="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans antialiased">
+
+<!-- NAV -->
+<header class="sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-zinc-950/60 border-b border-zinc-200 dark:border-zinc-800">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+
+    <div class="flex items-center gap-2 text-sm font-semibold">
+      <i data-lucide="shield"></i>
+      FinFlow <span class="text-blue-500 text-xs">SecOps</span>
+    </div>
+
+    <div class="flex items-center gap-4 text-xs">
+      <span class="text-green-500">● Live</span>
+      <button id="themeToggle" class="p-2 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800">
+        <i data-lucide="moon"></i>
+      </button>
+    </div>
+
+  </div>
+</header>
+
+<!-- HERO -->
+<main class="max-w-7xl mx-auto px-4 py-12">
+
+  <section class="grid md:grid-cols-2 gap-12 items-center">
+
+    <!-- LEFT: VALUE PROP -->
+    <div>
+      <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">
+        Detect.<br>
+        Explain.<br>
+        <span class="text-blue-500">Resolve Fast.</span>
+      </h1>
+
+      <p class="mt-6 text-zinc-500 max-w-md">
+        FinFlow turns infrastructure failures into structured, audit-ready incident intelligence in seconds.
+      </p>
+
+      <div class="mt-8 flex gap-4">
+        <button id="triggerBtn"
+          class="px-6 py-3 bg-red-600 text-white rounded-xl font-medium
+          hover:scale-[1.02] active:scale-95 transition shadow-lg">
+          Trigger Incident
+        </button>
+
+        <button onclick="window.print()"
+          class="px-6 py-3 border border-zinc-300 dark:border-zinc-700 rounded-xl
+          hover:scale-[1.02] active:scale-95 transition">
+          Export Report
+        </button>
+      </div>
+
+      <div class="mt-6 text-xs text-zinc-400">
+        RBI-ready · Trace-backed · Zero manual analysis
+      </div>
+    </div>
+
+    <!-- RIGHT: VISUAL CARD -->
+    <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800
+      bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md p-6 shadow-xl">
+
+      <div class="text-xs text-zinc-500 mb-2">Live Incident Preview</div>
+
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between">
+          <span>Latency Spike</span>
+          <span class="text-red-500">+900%</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span>Root Cause</span>
+          <span class="text-blue-500">Missing Index</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span>Status</span>
+          <span class="text-yellow-500">Investigating</span>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- LOADING SKELETON -->
+  <section id="skeleton" class="hidden mt-12 space-y-4 animate-pulse">
+    <div class="h-6 w-1/4 bg-zinc-300 dark:bg-zinc-800 rounded"></div>
+    <div class="h-4 bg-zinc-300 dark:bg-zinc-800 rounded"></div>
+    <div class="h-4 w-2/3 bg-zinc-300 dark:bg-zinc-800 rounded"></div>
+  </section>
+
+  <!-- ERROR -->
+  <div id="error" class="hidden mt-8 text-center text-sm text-red-500"></div>
+
+  <!-- REPORT -->
+  <section id="report" class="hidden mt-12">
+
+    <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800
+      bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md shadow-xl">
+
+      <div class="flex justify-between items-center px-6 py-3 border-b border-zinc-200 dark:border-zinc-800">
+        <span class="text-xs text-red-500 flex items-center gap-2">
+          <i data-lucide="alert-triangle"></i>
+          Critical Incident
+        </span>
+
+        <span id="timestamp" class="text-xs text-zinc-400"></span>
+      </div>
+
+      <div class="p-6 grid md:grid-cols-3 gap-6 text-sm">
+
+        <div>
+          <p class="text-xs text-zinc-500">Incident ID</p>
+          <p id="incId" class="font-semibold text-blue-500"></p>
+        </div>
+
+        <div>
+          <p class="text-xs text-zinc-500">MTTD</p>
+          <p id="mttd"></p>
+        </div>
+
+        <div>
+          <p class="text-xs text-zinc-500">Trace ID</p>
+          <p id="traceId" class="text-xs break-all"></p>
+        </div>
+
+        <div class="md:col-span-3">
+          <p class="text-xs text-zinc-500">Root Cause</p>
+          <p class="mt-1">Database sequential scan due to missing index → CPU saturation → latency spike.</p>
+        </div>
+
+        <a id="grafanaLink" target="_blank"
+          class="md:col-span-3 mt-4 inline-flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl text-sm hover:scale-[1.02] transition">
+          <i data-lucide="external-link"></i>
+          Open Full Trace
+        </a>
+
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<script type="module">
+import lucide from 'https://unpkg.com/lucide@latest/dist/esm/lucide.js';
+
+window.addEventListener('DOMContentLoaded', () => {
+
+  lucide.createIcons();
+
+  const btn = document.getElementById('triggerBtn');
+  const skeleton = document.getElementById('skeleton');
+  const report = document.getElementById('report');
+  const error = document.getElementById('error');
+
+  document.getElementById('themeToggle').onclick = () => {
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  };
+
+  btn.onclick = async () => {
+
+    btn.disabled = true;
+    skeleton.classList.remove('hidden');
+    report.classList.add('hidden');
+    error.classList.add('hidden');
+
+    try {
+      const start = performance.now();
+
+      const res = await fetch('https://demo.kartikinfra.in/api/simulate-slow');
+      if (!res.ok) throw new Error();
+
+      const data = await res.json();
+
+      const end = performance.now();
+
+      document.getElementById('mttd').innerText = ((end - start)/1000).toFixed(2) + 's';
+      document.getElementById('timestamp').innerText = data.timestamp;
+      document.getElementById('traceId').innerText = data.traceId;
+      document.getElementById('incId').innerText = 'INC-' + Math.floor(Math.random()*10000);
+
+      document.getElementById('grafanaLink').href = `https://grafana.kartikinfra.in/explore?traceId=${data.traceId}`;
+
+      report.classList.remove('hidden');
+
+    } catch {
+      error.innerText = 'System unreachable — check backend or CORS';
+      error.classList.remove('hidden');
+    } finally {
+      skeleton.classList.add('hidden');
+      btn.disabled = false;
+    }
+
+  };
+
+});
+</script>
+
+</body>
+</html>
