@@ -1,11 +1,12 @@
 const tracing = require("./tracing.js")
 const express = require("express");
 const { Pool } = require("pg");
+const { trace } = require('@opentelemetry/api')
 const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 
 // ✅ Updated DB config (NO fallback mistakes)
@@ -42,6 +43,26 @@ app.get("/api/transactions", async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error("DB ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/simulate-slow", async (req, res) => {
+  try {
+    const start = Date.now();
+    await pool.query(
+      "SELECT * FROM transactions WHERE amount > $1 ORDER BY created_at",
+      [100]
+     );
+    const duration = Date.now() - start;
+    const traceId = trace.getActiveSpan()?.spanContext().traceId || null;
+    res.json({
+      traceId,
+      duration,
+      timestamp: new Date().toISOString(),
+      service: "finflow-backend",
+    });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
