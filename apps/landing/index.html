@@ -3,19 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FinFlow — Incident Intelligence</title>
+  <title>FinFlow — RBI Audit Trail Infrastructure for Payment Aggregators</title>
 
-  <!-- Preconnect -->
   <link rel="preconnect" href="https://cdn.tailwindcss.com">
   <link rel="preconnect" href="https://unpkg.com">
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Tailwind Config -->
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -29,22 +24,18 @@
     }
   </script>
 
-  <!-- Theme (no flicker) -->
   <script>
     const t = localStorage.getItem('theme');
     if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
     }
   </script>
-
 </head>
 
 <body class="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans antialiased">
 
-<!-- NAV -->
 <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-zinc-950/60 border-b border-zinc-200 dark:border-zinc-800">
   <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-
     <div class="flex items-center gap-2 text-sm font-semibold">
       <i data-lucide="shield"></i>
       FinFlow <span class="text-blue-500 text-xs">SecOps</span>
@@ -56,130 +47,199 @@
         <i data-lucide="moon"></i>
       </button>
     </div>
-
   </div>
 </header>
 
-<!-- HERO -->
 <main class="max-w-7xl mx-auto px-4 py-12">
 
-  <section class="grid md:grid-cols-2 gap-12 items-center">
+<section class="grid md:grid-cols-2 gap-12 items-center">
 
-    <div>
-      <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">
-        Detect.<br>
-        Explain.<br>
-        <span class="text-blue-500">Resolve Fast.</span>
-      </h1>
+<div>
+  <p class="text-xs font-medium text-blue-500 mb-3 tracking-widest uppercase">
+    For seed-stage Payment Aggregators & Digital Lending startups
+  </p>
 
-      <p class="mt-6 text-zinc-500 max-w-md">
-        FinFlow turns infrastructure failures into structured, audit-ready incident intelligence in seconds.
-      </p>
+  <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">
+    RBI Audit Trail.<br>
+    Automated.<br>
+    <span class="text-blue-500">₹32k/month.</span>
+  </h1>
 
-      <div class="mt-8 flex gap-4">
-        <button id="triggerBtn"
-          class="px-6 py-3 bg-red-600 text-white rounded-xl font-medium
-          hover:scale-[1.02] active:scale-95 transition shadow-lg">
-          Trigger Incident
-        </button>
+  <p class="mt-6 text-zinc-500 max-w-md">
+    Falco runtime detection + OpenTelemetry traces + Grafana —
+    exactly what PA Master Direction mandates for monthly
+    cyber incident reporting. Setup in 3 weeks.
+  </p>
 
-        <button onclick="window.print()"
-          class="px-6 py-3 border border-zinc-300 dark:border-zinc-700 rounded-xl
-          hover:scale-[1.02] active:scale-95 transition">
-          Export Report
-        </button>
-      </div>
+  <div class="mt-8 flex flex-wrap gap-4">
+    <button id="triggerBtn"
+      class="px-6 py-3 bg-red-600 text-white rounded-xl font-medium
+      hover:scale-[1.02] active:scale-95 transition shadow-lg">
+      Trigger Security Event
+    </button>
 
-      <div class="mt-6 text-xs text-zinc-400">
-        RBI-ready · Trace-backed · Zero manual analysis
-      </div>
+    <a href="https://calendly.com/kartikk09/rbi-audit-call"
+      target="_blank"
+      class="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium
+      hover:scale-[1.02] active:scale-95 transition shadow-lg">
+      Book 20-min RBI Readiness Call
+    </a>
+  </div>
+
+  <div class="mt-6 text-xs text-zinc-400">
+    RBI-ready · Trace-backed · Zero manual analysis ·
+    <a href="https://github.com/kartikinfra/finflow-infra"
+      target="_blank" class="text-blue-500 hover:underline">
+      View source on GitHub
+    </a>
+  </div>
+</div>
+
+<div class="rounded-2xl border border-zinc-200 dark:border-zinc-800
+  bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md p-6 shadow-xl">
+
+  <div class="text-xs text-zinc-500 mb-2">Live Incident Preview</div>
+
+  <div class="space-y-3 text-sm">
+    <div class="flex justify-between">
+      <span>Latency Spike</span>
+      <span class="text-red-500">+900%</span>
     </div>
 
-    <!-- Preview -->
+    <div class="flex justify-between">
+      <span>Root Cause</span>
+      <span class="text-blue-500">Missing Index</span>
+    </div>
+
+    <div class="flex justify-between">
+      <span>Status</span>
+      <span class="text-yellow-500">Investigating</span>
+    </div>
+  </div>
+</div>
+
+</section>
+
+<section id="skeleton" class="hidden mt-12 space-y-4 animate-pulse">
+  <div class="h-6 w-1/4 bg-zinc-300 dark:bg-zinc-800 rounded"></div>
+  <div class="h-4 bg-zinc-300 dark:bg-zinc-800 rounded"></div>
+  <div class="h-4 w-2/3 bg-zinc-300 dark:bg-zinc-800 rounded"></div>
+</section>
+
+<div id="error" class="hidden mt-8 text-center text-sm text-red-500"></div>
+
+<section id="report" class="hidden mt-12">
+  <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800
+    bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md shadow-xl">
+
+    <div class="flex justify-between items-center px-6 py-3 border-b border-zinc-200 dark:border-zinc-800">
+      <span class="text-xs text-red-500 flex items-center gap-2">
+        <i data-lucide="alert-triangle"></i>
+        Critical Incident
+      </span>
+      <span id="timestamp" class="text-xs text-zinc-400"></span>
+    </div>
+
+    <div class="p-6 grid md:grid-cols-3 gap-6 text-sm">
+      <div>
+        <p class="text-xs text-zinc-500">Incident ID</p>
+        <p id="incId" class="font-semibold text-blue-500"></p>
+      </div>
+
+      <div>
+        <p class="text-xs text-zinc-500">MTTD</p>
+        <p id="mttd"></p>
+      </div>
+
+      <div>
+        <p class="text-xs text-zinc-500">Trace ID</p>
+        <p id="traceId" class="text-xs break-all"></p>
+      </div>
+
+      <div class="md:col-span-3">
+        <p class="text-xs text-zinc-500">Root Cause</p>
+        <p class="mt-1">Database sequential scan due to missing index → CPU saturation → latency spike.</p>
+      </div>
+
+      <a id="grafanaLink" target="_blank"
+        class="md:col-span-3 mt-4 inline-flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl text-sm hover:scale-[1.02] transition">
+        <i data-lucide="external-link"></i>
+        Open Full Trace
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="mt-20 max-w-3xl mx-auto">
+  <p class="text-xs text-zinc-500 text-center mb-2 tracking-widest uppercase">
+    Transparent Pricing
+  </p>
+  <h2 class="text-2xl font-bold text-center mb-8">
+    No Datadog. No surprise bills.
+  </h2>
+
+  <div class="grid md:grid-cols-2 gap-6">
+
     <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800
-      bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md p-6 shadow-xl">
-
-      <div class="text-xs text-zinc-500 mb-2">Live Incident Preview</div>
-
-      <div class="space-y-3 text-sm">
-        <div class="flex justify-between">
-          <span>Latency Spike</span>
-          <span class="text-red-500">+900%</span>
-        </div>
-
-        <div class="flex justify-between">
-          <span>Root Cause</span>
-          <span class="text-blue-500">Missing Index</span>
-        </div>
-
-        <div class="flex justify-between">
-          <span>Status</span>
-          <span class="text-yellow-500">Investigating</span>
-        </div>
-      </div>
-
+      bg-white/60 dark:bg-zinc-900/40 p-6">
+      <p class="text-xs text-zinc-500 mb-1">One-time Setup</p>
+      <p class="text-3xl font-bold">₹1,75,000</p>
+      <p class="text-sm text-zinc-500 mt-1">3 weeks · your cluster</p>
+      <ul class="mt-4 space-y-2 text-sm text-zinc-400">
+        <li>✓ Falco + eBPF runtime detection</li>
+        <li>✓ OpenTelemetry + Tempo traces</li>
+        <li>✓ 10 RBI-mapped Falco rules</li>
+        <li>✓ Network Policies + RBAC</li>
+        <li>✓ Monthly report template</li>
+      </ul>
     </div>
 
-  </section>
-
-  <!-- Loader -->
-  <section id="skeleton" class="hidden mt-12 space-y-4 animate-pulse">
-    <div class="h-6 w-1/4 bg-zinc-300 dark:bg-zinc-800 rounded"></div>
-    <div class="h-4 bg-zinc-300 dark:bg-zinc-800 rounded"></div>
-    <div class="h-4 w-2/3 bg-zinc-300 dark:bg-zinc-800 rounded"></div>
-  </section>
-
-  <!-- Error -->
-  <div id="error" class="hidden mt-8 text-center text-sm text-red-500"></div>
-
-  <!-- Report -->
-  <section id="report" class="hidden mt-12">
-    <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800
-      bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md shadow-xl">
-
-      <div class="flex justify-between items-center px-6 py-3 border-b border-zinc-200 dark:border-zinc-800">
-        <span class="text-xs text-red-500 flex items-center gap-2">
-          <i data-lucide="alert-triangle"></i>
-          Critical Incident
-        </span>
-        <span id="timestamp" class="text-xs text-zinc-400"></span>
-      </div>
-
-      <div class="p-6 grid md:grid-cols-3 gap-6 text-sm">
-
-        <div>
-          <p class="text-xs text-zinc-500">Incident ID</p>
-          <p id="incId" class="font-semibold text-blue-500"></p>
-        </div>
-
-        <div>
-          <p class="text-xs text-zinc-500">MTTD</p>
-          <p id="mttd"></p>
-        </div>
-
-        <div>
-          <p class="text-xs text-zinc-500">Trace ID</p>
-          <p id="traceId" class="text-xs break-all"></p>
-        </div>
-
-        <div class="md:col-span-3">
-          <p class="text-xs text-zinc-500">Root Cause</p>
-          <p class="mt-1">Database sequential scan due to missing index → CPU saturation → latency spike.</p>
-        </div>
-
-        <a id="grafanaLink" target="_blank"
-          class="md:col-span-3 mt-4 inline-flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl text-sm hover:scale-[1.02] transition">
-          <i data-lucide="external-link"></i>
-          Open Full Trace
-        </a>
-
-      </div>
+    <div class="rounded-2xl border border-blue-500
+      bg-white/60 dark:bg-zinc-900/40 p-6">
+      <p class="text-xs text-blue-500 mb-1">Monthly Managed</p>
+      <p class="text-3xl font-bold">₹32,000<span class="text-base font-normal">/mo</span></p>
+      <p class="text-sm text-zinc-500 mt-1">vs Datadog ₹1,50,000+/mo</p>
+      <ul class="mt-4 space-y-2 text-sm text-zinc-400">
+        <li>✓ Weekly cluster review</li>
+        <li>✓ Monthly RBI report (draft ready)</li>
+        <li>✓ Falco rule updates on new circulars</li>
+        <li>✓ Priority Slack support</li>
+        <li>✓ Quarterly RBI Readiness Scorecard</li>
+      </ul>
     </div>
-  </section>
+
+  </div>
+
+  <div class="mt-8 text-center">
+    <a href="https://calendly.com/kartikk09/rbi-audit-call"
+      target="_blank"
+      class="px-8 py-4 bg-blue-600 text-white rounded-xl font-medium
+      hover:scale-[1.02] transition inline-block">
+      Book Free 20-min RBI Readiness Call
+    </a>
+    <p class="text-xs text-zinc-500 mt-3">
+      No pitch. Just understand your current setup.
+    </p>
+  </div>
+</section>
 
 </main>
 
-<!-- SCRIPT -->
+<footer class="mt-20 border-t border-zinc-200 dark:border-zinc-800 py-8">
+  <div class="max-w-7xl mx-auto px-4 flex flex-wrap justify-between
+    items-center gap-4 text-xs text-zinc-500">
+    <span>Built by <a href="https://linkedin.com/in/kartikk09"
+      target="_blank" class="text-blue-500 hover:underline">Kartik</a>
+      · Startup Disaster Lab</span>
+    <span>Running on Oracle Cloud ARM · k3s · Falco 0.43.0</span>
+    <a href="https://github.com/kartikinfra/finflow-infra"
+      target="_blank" class="text-blue-500 hover:underline">
+      GitHub →
+    </a>
+  </div>
+</footer>
+
 <script>
 window.addEventListener('DOMContentLoaded', () => {
 
@@ -222,14 +282,20 @@ window.addEventListener('DOMContentLoaded', () => {
         'INC-' + Math.floor(Math.random()*10000);
 
       const grafanaUrl =
-        `https://grafana.kartikinfra.in/explore?orgId=1&left=` +
+         `https://grafana.kartikinfra.in/explore?orgId=1&left=` +
         encodeURIComponent(JSON.stringify({
-          datasource: "Tempo",
-          queries: [{
-            refId: "A",
-            queryType: "traceId",
-            query: data.traceId
-          }]
+          datasource: "ffj1etsw8c2kgc",
+          queries: [
+            {
+             refId: "A",
+             queryType: "traceql",
+             query: data.traceId
+            }
+          ],
+          range: {
+             from: "now-15m",
+             to: "now+5m"
+          }
         }));
 
       document.getElementById('grafanaLink').href = grafanaUrl;
