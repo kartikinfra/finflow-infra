@@ -4,6 +4,8 @@ grafana:
       enabled: true
       org_role: Viewer
       org_name: Main Org.
+    users:
+      viewers_can_edit: true
 
   dashboardProviders:
     dashboardproviders.yaml:
