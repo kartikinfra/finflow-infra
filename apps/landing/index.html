@@ -1,126 +1,151 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FinFlow — RBI Audit Trail Infrastructure for Payment Aggregators</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FinFlow — RBI Audit Trail Infrastructure for Payment Aggregators</title>
 
-  <link rel="preconnect" href="https://cdn.tailwindcss.com">
-  <link rel="preconnect" href="https://unpkg.com">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter','system-ui','sans-serif']
-          }
-        }
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Inter','system-ui','sans-serif'],
       }
     }
-  </script>
+  }
+}
+</script>
 
-  <script>
-    const t = localStorage.getItem('theme');
-    if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    }
-  </script>
+<style>
+.glass {
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(20px);
+}
+.dark .glass {
+  background: rgba(20,20,22,0.6);
+}
+</style>
+
+<script>
+(function () {
+  const t = localStorage.getItem('theme');
+  if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  }
+})();
+</script>
 </head>
 
 <body class="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans antialiased">
 
-<header class="sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-zinc-950/60 border-b border-zinc-200 dark:border-zinc-800">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-2 text-sm font-semibold">
-      <i data-lucide="shield"></i>
-      FinFlow <span class="text-blue-500 text-xs">SecOps</span>
+<!-- HEADER -->
+<header class="fixed top-0 w-full z-50 border-b border-zinc-200/40 dark:border-zinc-800/40 glass">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-2 font-semibold tracking-tight">
+      <i data-lucide="shield" class="w-5 h-5 text-blue-500"></i>
+      FinFlow <span class="text-blue-500 text-xs ml-1">SecOps</span>
     </div>
-
     <div class="flex items-center gap-4 text-xs">
       <span class="text-green-500">● Live</span>
-      <button id="themeToggle" class="p-2 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800">
-        <i data-lucide="moon"></i>
+      <button id="themeToggle" class="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800">
+        <i data-lucide="moon" class="w-4 h-4"></i>
       </button>
     </div>
   </div>
 </header>
 
-<main class="max-w-7xl mx-auto px-4 py-12">
+<main class="pt-32 max-w-6xl mx-auto px-6 space-y-32">
 
-<section class="grid md:grid-cols-2 gap-12 items-center">
+<!-- HERO -->
+<section class="text-center max-w-3xl mx-auto">
 
-<div>
   <p class="text-xs font-medium text-blue-500 mb-3 tracking-widest uppercase">
     For seed-stage Payment Aggregators & Digital Lending startups
   </p>
 
-  <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">
-    RBI Audit Trail.<br>
-    Automated.<br>
-    <span class="text-blue-500">₹32k/month.</span>
+  <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05]">
+    RBI Audit Trail.<br/>
+    <span class="text-blue-500">Automated. ₹32k/month.</span>
   </h1>
 
-  <p class="mt-6 text-zinc-500 max-w-md">
+  <p class="mt-6 text-lg text-zinc-500 leading-relaxed max-w-xl mx-auto">
     Falco runtime detection + OpenTelemetry traces + Grafana —
     exactly what PA Master Direction mandates for monthly
     cyber incident reporting. Setup in 3 weeks.
   </p>
 
-  <div class="mt-8 flex flex-wrap gap-4">
+  <p class="mt-3 text-sm text-red-500 font-medium">
+    ⚠ Non-compliance: ₹10 lakh/violation + licence risk under PSS Act
+  </p>
+
+  <div class="mt-10 flex justify-center gap-4 flex-wrap">
     <button id="triggerBtn"
-      class="px-6 py-3 bg-red-600 text-white rounded-xl font-medium
-      hover:scale-[1.02] active:scale-95 transition shadow-lg">
+      class="px-7 py-3 rounded-full bg-red-600 text-white font-medium hover:scale-[1.03] transition shadow-lg">
       Trigger Security Event
     </button>
-
-    <a href="https://calendly.com/kartikk09/rbi-audit-call"
-      target="_blank"
-      class="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium
-      hover:scale-[1.02] active:scale-95 transition shadow-lg">
+    <a href="https://calendly.com/kartikops-dev/30min" target="_blank"
+       class="px-7 py-3 rounded-full bg-blue-600 text-white font-medium hover:scale-[1.03] transition">
       Book 20-min RBI Readiness Call
     </a>
   </div>
 
   <div class="mt-6 text-xs text-zinc-400">
     RBI-ready · Trace-backed · Zero manual analysis ·
-    <a href="https://github.com/kartikinfra/finflow-infra"
-      target="_blank" class="text-blue-500 hover:underline">
+    <a href="https://github.com/kartikinfra/finflow-infra" target="_blank" class="text-blue-500 hover:underline">
       View source on GitHub
     </a>
   </div>
-</div>
-
-<div class="rounded-2xl border border-zinc-200 dark:border-zinc-800
-  bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md p-6 shadow-xl">
-
-  <div class="text-xs text-zinc-500 mb-2">Live Incident Preview</div>
-
-  <div class="space-y-3 text-sm">
-    <div class="flex justify-between">
-      <span>Latency Spike</span>
-      <span class="text-red-500">+900%</span>
-    </div>
-
-    <div class="flex justify-between">
-      <span>Root Cause</span>
-      <span class="text-blue-500">Missing Index</span>
-    </div>
-
-    <div class="flex justify-between">
-      <span>Status</span>
-      <span class="text-yellow-500">Investigating</span>
-    </div>
-  </div>
-</div>
 
 </section>
 
-<section id="skeleton" class="hidden mt-12 space-y-4 animate-pulse">
+<!-- LIVE DEMO + REPORT -->
+<section id="report" class="hidden max-w-4xl mx-auto">
+  <div class="glass border border-zinc-200/50 dark:border-zinc-800 rounded-3xl shadow-xl">
+
+    <div class="flex justify-between items-center px-6 py-3 border-b border-zinc-200 dark:border-zinc-800">
+      <span class="text-xs text-red-500 flex items-center gap-2">
+        <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+        Critical Incident
+      </span>
+      <span id="timestamp" class="text-xs text-zinc-400"></span>
+    </div>
+
+    <div class="p-8 grid md:grid-cols-3 gap-6 text-sm">
+      <div>
+        <p class="text-xs text-zinc-500">Incident ID</p>
+        <p id="incId" class="font-semibold text-blue-500 text-lg"></p>
+      </div>
+      <div>
+        <p class="text-xs text-zinc-500">MTTD</p>
+        <p id="mttd" class="text-lg font-medium"></p>
+      </div>
+      <div>
+        <p class="text-xs text-zinc-500">Trace ID</p>
+        <p id="traceId" class="text-xs break-all font-mono"></p>
+      </div>
+      <div class="md:col-span-3">
+        <p class="text-xs text-zinc-500">Root Cause</p>
+        <p class="mt-1 leading-relaxed">Database sequential scan due to missing index → CPU saturation → latency spike.</p>
+      </div>
+      <a id="grafanaLink" target="_blank"
+        class="md:col-span-3 mt-4 inline-flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-xl text-sm font-medium hover:scale-[1.02] transition">
+        <i data-lucide="external-link" class="w-4 h-4"></i>
+        Open Full Trace in Grafana
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="skeleton" class="hidden max-w-4xl mx-auto space-y-4 animate-pulse">
   <div class="h-6 w-1/4 bg-zinc-300 dark:bg-zinc-800 rounded"></div>
   <div class="h-4 bg-zinc-300 dark:bg-zinc-800 rounded"></div>
   <div class="h-4 w-2/3 bg-zinc-300 dark:bg-zinc-800 rounded"></div>
@@ -128,65 +153,162 @@
 
 <div id="error" class="hidden mt-8 text-center text-sm text-red-500"></div>
 
-<section id="report" class="hidden mt-12">
-  <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800
-    bg-white/60 dark:bg-zinc-900/40 backdrop-blur-md shadow-xl">
-
-    <div class="flex justify-between items-center px-6 py-3 border-b border-zinc-200 dark:border-zinc-800">
-      <span class="text-xs text-red-500 flex items-center gap-2">
-        <i data-lucide="alert-triangle"></i>
-        Critical Incident
-      </span>
-      <span id="timestamp" class="text-xs text-zinc-400"></span>
+<!-- TRUST SIGNALS -->
+<section class="text-center max-w-4xl mx-auto">
+  <div class="flex flex-wrap justify-center gap-8 text-sm text-zinc-500">
+    <div class="flex items-center gap-2">
+      <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+      Cluster live since Oct 2025 · 99.9% uptime
     </div>
-
-    <div class="p-6 grid md:grid-cols-3 gap-6 text-sm">
-      <div>
-        <p class="text-xs text-zinc-500">Incident ID</p>
-        <p id="incId" class="font-semibold text-blue-500"></p>
-      </div>
-
-      <div>
-        <p class="text-xs text-zinc-500">MTTD</p>
-        <p id="mttd"></p>
-      </div>
-
-      <div>
-        <p class="text-xs text-zinc-500">Trace ID</p>
-        <p id="traceId" class="text-xs break-all"></p>
-      </div>
-
-      <div class="md:col-span-3">
-        <p class="text-xs text-zinc-500">Root Cause</p>
-        <p class="mt-1">Database sequential scan due to missing index → CPU saturation → latency spike.</p>
-      </div>
-
-      <a id="grafanaLink" target="_blank"
-        class="md:col-span-3 mt-4 inline-flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-xl text-sm hover:scale-[1.02] transition">
-        <i data-lucide="external-link"></i>
-        Open Full Trace
-      </a>
+    <div class="flex items-center gap-2">
+      <span>🧑‍💻</span>
+      <a href="https://github.com/kartikinfra/finflow-infra" target="_blank" class="text-blue-500 hover:underline">Open Source — 71 commits</a>
+    </div>
+    <div class="flex items-center gap-2">
+      <span>🛡️</span>
+      9 production incidents documented
     </div>
   </div>
 </section>
 
-<!-- PRICING -->
-<section class="mt-20 max-w-3xl mx-auto">
-  <p class="text-xs text-zinc-500 text-center mb-2 tracking-widest uppercase">
-    Transparent Pricing
-  </p>
-  <h2 class="text-2xl font-bold text-center mb-8">
-    No Datadog. No surprise bills.
+<!-- AUDITOR BLOCK -->
+<section class="max-w-4xl mx-auto">
+  <div class="glass border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-8 text-center">
+
+    <p class="text-sm text-zinc-500 mb-6">
+      What the RBI auditor will ask:
+    </p>
+
+    <div class="space-y-3 text-lg font-medium">
+      <p>"Show last month's cyber incidents"</p>
+      <p>"How were they detected?"</p>
+      <p>"Where is the trace + root cause?"</p>
+    </div>
+
+    <p class="mt-6 text-blue-500 font-semibold">
+      FinFlow answers all three automatically. <span class="text-zinc-400 font-normal">Trigger the incident above to see proof.</span>
+    </p>
+
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="grid md:grid-cols-2 gap-16 items-center">
+
+  <div>
+    <h2 class="text-4xl font-semibold tracking-tight">
+      RBI doesn't want dashboards.<br/>
+      <span class="text-zinc-400">They want evidence.</span>
+    </h2>
+
+    <p class="mt-6 text-zinc-500 leading-relaxed">
+      Logs are scattered. Detection is manual. Reports are stitched together before submission.
+      That's where audits fail — not because of infrastructure, but because of missing audit trail.
+    </p>
+  </div>
+
+  <div class="space-y-4 text-sm text-zinc-500">
+    <div class="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800">Logs scattered across tools</div>
+    <div class="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800">Manual detection</div>
+    <div class="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800">Excel-based reports</div>
+  </div>
+
+</section>
+
+<!-- WHAT YOU SHOW AUDITOR -->
+<section class="text-center">
+
+  <h2 class="text-4xl font-semibold tracking-tight mb-10">
+    What you show an auditor
   </h2>
 
-  <div class="grid md:grid-cols-2 gap-6">
+  <div class="grid md:grid-cols-3 gap-6">
 
-    <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800
-      bg-white/60 dark:bg-zinc-900/40 p-6">
-      <p class="text-xs text-zinc-500 mb-1">One-time Setup</p>
-      <p class="text-3xl font-bold">₹1,75,000</p>
-      <p class="text-sm text-zinc-500 mt-1">3 weeks · your cluster</p>
-      <ul class="mt-4 space-y-2 text-sm text-zinc-400">
+    <div class="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 text-left">
+      <p class="font-medium mb-2">RBI Report</p>
+      <p class="text-sm text-zinc-500">Incidents, timestamps, severity — ready to submit format</p>
+    </div>
+
+    <div class="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 text-left">
+      <p class="font-medium mb-2">Trace Mapping</p>
+      <p class="text-sm text-zinc-500">Root cause linked to every incident with trace ID</p>
+    </div>
+
+    <div class="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 text-left">
+      <p class="font-medium mb-2">Detection Evidence</p>
+      <p class="text-sm text-zinc-500">Falco + eBPF runtime events — not manual logs</p>
+    </div>
+
+  </div>
+
+  <p class="mt-6 text-sm text-zinc-400">
+    Not dashboards. Not guesswork. <strong class="text-zinc-900 dark:text-white">Audit evidence.</strong>
+  </p>
+
+</section>
+
+<!-- WHO THIS IS FOR -->
+<section class="max-w-2xl mx-auto">
+  <div class="rounded-2xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20 p-8 text-sm">
+    <p class="font-semibold mb-3 text-base">✅ You're a fit if:</p>
+    <ul class="space-y-2 text-zinc-600 dark:text-zinc-400">
+      <li>• You're a Payment Aggregator or Digital Lending startup (seed/Series A)</li>
+      <li>• You've applied for or received RBI authorization</li>
+      <li>• You're on Kubernetes (or planning within 1 month)</li>
+      <li>• Monthly RBI reporting currently takes more than 2 days or is manual</li>
+    </ul>
+    <p class="font-semibold mt-6 mb-3 text-base">❌ Not a fit if:</p>
+    <ul class="space-y-2 text-zinc-600 dark:text-zinc-400">
+      <li>• You need a full-stack DevOps team (we're RBI-specific security)</li>
+      <li>• You're pre-funding or pre-revenue (compliance isn't urgent yet)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- HOW -->
+<section class="text-center">
+
+  <h2 class="text-4xl font-semibold mb-10">
+    Deployed in 3 weeks
+  </h2>
+
+  <div class="grid md:grid-cols-3 gap-8 text-left">
+
+    <div class="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+      <p class="font-medium mb-2">1. Install</p>
+      <p class="text-sm text-zinc-500">Falco + eBPF + OpenTelemetry on your existing K8s cluster</p>
+    </div>
+
+    <div class="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+      <p class="font-medium mb-2">2. Correlate</p>
+      <p class="text-sm text-zinc-500">Every incident automatically linked to a trace and root cause</p>
+    </div>
+
+    <div class="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+      <p class="font-medium mb-2">3. Report</p>
+      <p class="text-sm text-zinc-500">RBI-ready monthly report generated every month</p>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- PRICING -->
+<section class="text-center">
+
+  <h2 class="text-4xl font-semibold mb-4">
+    Cheaper than building. Safer than ignoring.
+  </h2>
+
+  <p class="text-zinc-500 mb-10">Hiring 1 security engineer = ₹15–25L/year. You don't need that.</p>
+
+  <div class="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+
+    <div class="p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 text-left">
+      <p class="text-xs text-zinc-500 uppercase tracking-widest mb-2">One-time Setup</p>
+      <p class="text-4xl font-bold">₹1,75,000</p>
+      <p class="text-sm text-zinc-500 mt-2">3 weeks · your cluster</p>
+      <ul class="mt-6 space-y-2 text-sm text-zinc-500">
         <li>✓ Falco + eBPF runtime detection</li>
         <li>✓ OpenTelemetry + Tempo traces</li>
         <li>✓ 10 RBI-mapped Falco rules</li>
@@ -195,12 +317,11 @@
       </ul>
     </div>
 
-    <div class="rounded-2xl border border-blue-500
-      bg-white/60 dark:bg-zinc-900/40 p-6">
-      <p class="text-xs text-blue-500 mb-1">Monthly Managed</p>
-      <p class="text-3xl font-bold">₹32,000<span class="text-base font-normal">/mo</span></p>
-      <p class="text-sm text-zinc-500 mt-1">vs Datadog ₹1,50,000+/mo</p>
-      <ul class="mt-4 space-y-2 text-sm text-zinc-400">
+    <div class="p-8 rounded-2xl bg-blue-600 text-white text-left">
+      <p class="text-xs opacity-80 uppercase tracking-widest mb-2">Monthly Managed</p>
+      <p class="text-4xl font-bold">₹32,000<span class="text-base font-normal">/mo</span></p>
+      <p class="text-sm opacity-80 mt-2">vs Datadog ₹1,50,000+/mo</p>
+      <ul class="mt-6 space-y-2 text-sm opacity-90">
         <li>✓ Weekly cluster review</li>
         <li>✓ Monthly RBI report (draft ready)</li>
         <li>✓ Falco rule updates on new circulars</li>
@@ -211,50 +332,66 @@
 
   </div>
 
-  <div class="mt-8 text-center">
-    <a href="https://calendly.com/kartikk09/rbi-audit-call"
-      target="_blank"
-      class="px-8 py-4 bg-blue-600 text-white rounded-xl font-medium
-      hover:scale-[1.02] transition inline-block">
+  <div class="mt-6 bg-red-50 dark:bg-red-950/20 rounded-xl p-4 text-sm text-red-600 dark:text-red-400 max-w-3xl mx-auto text-center">
+    💸 <strong>₹1.75L setup vs ₹10L penalty</strong> — that's a 5.7x return before your first monthly report
+  </div>
+
+</section>
+
+<!-- FINAL CTA -->
+<section class="text-center pb-20">
+
+  <h2 class="text-4xl font-semibold mb-6">
+    Fix the audit trail before the audit.
+  </h2>
+
+  <div class="flex justify-center gap-4 flex-wrap">
+    <a href="https://calendly.com/kartikops-dev/30min" target="_blank"
+       class="px-8 py-4 rounded-full bg-blue-600 text-white font-medium hover:scale-[1.03] transition shadow-lg">
       Book Free 20-min RBI Readiness Call
     </a>
-    <p class="text-xs text-zinc-500 mt-3">
-      No pitch. Just understand your current setup.
-    </p>
+    <button onclick="navigator.share({title:'FinFlow — RBI Audit Trail Infra',url:window.location.href})"
+       class="px-8 py-4 rounded-full border border-zinc-300 dark:border-zinc-700 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition text-sm">
+      📤 Share with your CTO
+    </button>
   </div>
+
+  <p class="text-sm text-zinc-400 mt-4">
+    No pitch. Just understand your current setup.
+  </p>
+
 </section>
 
 </main>
 
-<footer class="mt-20 border-t border-zinc-200 dark:border-zinc-800 py-8">
-  <div class="max-w-7xl mx-auto px-4 flex flex-wrap justify-between
-    items-center gap-4 text-xs text-zinc-500">
-    <span>Built by <a href="https://linkedin.com/in/kartikk09"
-      target="_blank" class="text-blue-500 hover:underline">Kartik</a>
-      · Startup Disaster Lab</span>
+<!-- FOOTER -->
+<footer class="border-t border-zinc-200 dark:border-zinc-800 py-8">
+  <div class="max-w-6xl mx-auto px-6 flex flex-wrap justify-between items-center gap-4 text-xs text-zinc-500">
+    <span>Built by <a href="https://linkedin.com/in/kartikk09" target="_blank" class="text-blue-500 hover:underline">Kartik Kakodiya</a> · Startup Disaster Lab</span>
     <span>Running on Oracle Cloud ARM · k3s · Falco 0.43.0</span>
-    <a href="https://github.com/kartikinfra/finflow-infra"
-      target="_blank" class="text-blue-500 hover:underline">
+    <a href="https://github.com/kartikinfra/finflow-infra" target="_blank" class="text-blue-500 hover:underline">
       GitHub →
     </a>
   </div>
 </footer>
 
 <script>
-window.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
 
   lucide.createIcons();
 
-  const btn = document.getElementById('triggerBtn');
-  const skeleton = document.getElementById('skeleton');
-  const report = document.getElementById('report');
-  const error = document.getElementById('error');
-
+  // Theme toggle
   document.getElementById('themeToggle').onclick = () => {
     document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme',
       document.documentElement.classList.contains('dark') ? 'dark' : 'light');
   };
+
+  // Trigger button
+  const btn = document.getElementById('triggerBtn');
+  const skeleton = document.getElementById('skeleton');
+  const report = document.getElementById('report');
+  const error = document.getElementById('error');
 
   btn.onclick = async () => {
 
