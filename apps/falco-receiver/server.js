@@ -34,17 +34,47 @@ app.post('/alert', (req, res) => {
   res.sendStatus(200);
 });
 
-// ── Alerts JSON ──
+// ── Alerts JSON (grouped, current month only) ──
 app.get('/alerts', (req, res) => {
-  const alerts = db.prepare('SELECT * FROM alerts ORDER BY received_at DESC').all();
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  
+  const alerts = db.prepare(`
+    SELECT 
+      rule,
+      priority,
+      container_name,
+      COUNT(*) as total_count,
+      MIN(received_at) as first_seen,
+      MAX(received_at) as last_seen
+    FROM alerts 
+    WHERE received_at >= ?
+    GROUP BY rule, priority, container_name
+    ORDER BY total_count DESC
+  `).all(monthStart);
+  
   res.json(alerts);
 });
 
-// ── Report generate + download ──
+// ── Report PDF (grouped, current month only) ──
 app.get('/report', (req, res) => {
-  const alerts = db.prepare('SELECT * FROM alerts ORDER BY received_at DESC').all();
   const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const month = now.toLocaleString('en-IN', { month: 'long', year: 'numeric' });
+
+  const alerts = db.prepare(`
+    SELECT 
+      rule,
+      priority,
+      container_name,
+      COUNT(*) as total_count,
+      MIN(received_at) as first_seen,
+      MAX(received_at) as last_seen
+    FROM alerts 
+    WHERE received_at >= ?
+    GROUP BY rule, priority, container_name
+    ORDER BY total_count DESC
+  `).all(monthStart);
 
   const doc = new PDFDocument({ margin: 50, size: 'A4' });
   res.setHeader('Content-Type', 'application/pdf');
@@ -81,9 +111,12 @@ app.get('/report', (req, res) => {
   doc.moveDown(5);
 
   // ── Summary ──
-  const critical = alerts.filter(a => a.priority.toLowerCase().includes('critical')).length;
-  const warning  = alerts.filter(a => a.priority.toLowerCase().includes('warning')).length;
-  const notice   = alerts.filter(a => a.priority.toLowerCase().includes('notice')).length;
+  const critical = alerts.filter(a => a.priority.toLowerCase().includes('critical'))
+                        .reduce((sum, a) => sum + a.total_count, 0);
+  const warning  = alerts.filter(a => a.priority.toLowerCase().includes('warning'))
+                        .reduce((sum, a) => sum + a.total_count, 0);
+  const notice   = alerts.filter(a => a.priority.toLowerCase().includes('notice'))
+                        .reduce((sum, a) => sum + a.total_count, 0);
 
   doc.y = 160;
   doc.fillColor(BLUE).fontSize(12).font('Helvetica-Bold').text('1. INCIDENT SUMMARY', 50);
@@ -93,7 +126,7 @@ app.get('/report', (req, res) => {
   const sy = doc.y;
   doc.fillColor(LGRAY).rect(50, sy, 495, 35).fill();
   doc.fillColor(GRAY).fontSize(8).font('Helvetica-Bold');
-  doc.text(`Total Alerts: ${alerts.length}`, 60, sy + 12);
+  doc.text(`Total Alerts: ${alerts.reduce((s,a) => s + a.total_count, 0)}`, 60, sy + 12);
   doc.fillColor(RED).text(`Critical: ${critical}`, 180, sy + 12);
   doc.fillColor(AMBER).text(`Warning: ${warning}`, 280, sy + 12);
   doc.fillColor(LBLUE).text(`Notice: ${notice}`, 380, sy + 12);
@@ -109,11 +142,11 @@ app.get('/report', (req, res) => {
   const th = doc.y;
   doc.fillColor(BLUE).rect(50, th, 495, 20).fill();
   doc.fillColor('white').fontSize(7.5).font('Helvetica-Bold');
-  doc.text('Timestamp (UTC)', 55, th + 6);
-  doc.text('Rule', 160, th + 6);
-  doc.text('Priority', 360, th + 6);
-  doc.text('Container', 420, th + 6);
-  doc.text('Process', 490, th + 6);
+  doc.text('Rule', 55, th + 6);
+  doc.text('Priority', 270, th + 6);
+  doc.text('Container', 340, th + 6);
+  doc.text('Count', 430, th + 6);
+  doc.text('Last Seen', 465, th + 6);
 
   let rowY = th + 20;
   alerts.forEach((a, i) => {
@@ -124,20 +157,19 @@ app.get('/report', (req, res) => {
                  : a.priority.toLowerCase().includes('warning')  ? AMBER
                  : LBLUE;
 
-    const ts = a.received_at.slice(0, 19).replace('T', ' ');
     doc.fillColor(GRAY).fontSize(7).font('Helvetica')
-       .text(ts, 55, rowY + 5, { width: 100, ellipsis: true });
-    doc.text(a.rule, 160, rowY + 5, { width: 195, ellipsis: true });
+       .text(a.rule, 55, rowY + 5, { width: 210, ellipsis: true });
     doc.fillColor(pColor).font('Helvetica-Bold')
-       .text(a.priority, 360, rowY + 5, { width: 55 });
+       .text(a.priority, 270, rowY + 5);
     doc.fillColor(GRAY).font('Helvetica')
-       .text(a.container_name || '—', 420, rowY + 5, { width: 65, ellipsis: true });
-    doc.font('Courier')
-       .text(a.proc_name || '—', 490, rowY + 5, { width: 50, ellipsis: true });
+       .text(a.container_name || '—', 340, rowY + 5, { width: 85, ellipsis: true });
+    doc.font('Helvetica-Bold')
+       .text(String(a.total_count), 430, rowY + 5);
+    doc.font('Helvetica')
+       .text(a.last_seen.slice(0, 10), 465, rowY + 5);
 
     rowY += 18;
 
-    // New page if needed
     if (rowY > doc.page.height - 120) {
       doc.addPage();
       rowY = 50;
@@ -152,7 +184,7 @@ app.get('/report', (req, res) => {
 
   const compliance = [
     ['Runtime threat detection in place', 'Sec 8.3', 'COMPLIANT', 'Falco eBPF — live'],
-    ['Audit trail generated per incident', 'Sec 8.3', 'COMPLIANT', `${alerts.length} events logged`],
+    ['Audit trail generated per incident', 'Sec 8.3', 'COMPLIANT', `${alerts.reduce((s,a) => s + a.total_count, 0)} events logged`],
     ['Network access controls enforced',  'Sec 6.2', 'COMPLIANT', 'Network Policy default-deny-all'],
     ['Monthly report submitted to RBI',   'Sec 8.3', 'COMPLIANT', 'This auto-generated report'],
   ];
