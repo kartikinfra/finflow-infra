@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falco-receiver
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: falco-receiver
+  template:
+    metadata:
+      labels:
+        app: falco-receiver
+    spec:
+      containers:
+        - name: falco-receiver
+          image: kaka750/falco-receiver:v1-arm
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: falco-receiver-pvc
