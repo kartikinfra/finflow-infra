@@ -31,3 +31,9 @@ falco:
   http_output:
     enabled: true
     url: http://falcosidekick.monitoring.svc.cluster.local:2801
+falcosidekick:
+  enabled: true
+  config:
+    webhook:
+      address: "http://falco-receiver-svc.monitoring.svc.cluster.local:3000/alert"
+      minimumpriority: "debug" # Sabhi alerts capture karne ke liye

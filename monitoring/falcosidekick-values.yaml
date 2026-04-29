@@ -1,0 +1,6 @@
+config:
+  alertmanager:
+    endpoint: /api/v2/alerts
+    hostport: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
+  webhook:
+    address: http://falco-receiver-svc.monitoring.svc.cluster.local:3000/alert
