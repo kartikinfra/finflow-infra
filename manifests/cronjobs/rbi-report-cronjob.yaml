@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: rbi-report-generator
+  namespace: monitoring
+spec:
+  schedule: "0 9 1 * *" # first day of montih
+  jobTemplate:
+    spec: 
+      template:
+        spec:
+          containers: 
+          - name: report-downloader
+            image: curlimages/curl:latest
+            command:
+            - /bin/sh
+            - -c
+            - |
+              curl -s http://falco-receiver-svc:3000/report -o /data/reports/RBI-Monthly-$(date +%Y-%m).pdf
+           volumeMounts:
+            - name: report-storage
+              mountPath: /data/reports
+         restartPolicy: OnFailure
+         volumes:
+         - name: report-storge
+           persistentVolumeClaim:
+              claimName: falco-reciver-pvc`
