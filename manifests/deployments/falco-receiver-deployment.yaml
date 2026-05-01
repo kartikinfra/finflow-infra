@@ -15,12 +15,26 @@ spec:
     spec:
       containers:
         - name: falco-receiver
-          image: kaka750/falco-receiver:v1-arm
+          image: kaka750/falco-receiver:v6-arm
           ports:
             - containerPort: 3000
+          env:
+           - name: CLIENT_NAME
+             value: "XYZ Payments Pvt Ltd"
+           - name: CLIENT_RBI_NO
+             value: "RBI-PA-2024-XXXX"
+           - name: CLIENT_DOMAIN
+             value: "xyzpayments.in"
           volumeMounts:
             - name: data
               mountPath: /data
+          resources: 
+            requests:
+               cpu: 50m
+               memory: 64Mi
+            limits:
+               cpu: 200m
+               memory: 128Mi
       volumes:
         - name: data
           persistentVolumeClaim:
