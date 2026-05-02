@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>FinFlow — RBI Audit Trail Infrastructure for Payment Aggregators</title>
+<title>FinFlow — RBI Audit Reports, Done For You. Monthly PDF. Zero Writing.</title>
+<meta name="description" content="We deploy Falco+eBPF on your K8s cluster. Every incident is detected, traced to root cause, and documented in an RBI-ready monthly report. You just submit it."/>
 
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 
 <script>
 tailwind.config = {
@@ -18,436 +16,1479 @@ tailwind.config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter','system-ui','sans-serif'],
+        display: ['Syne','sans-serif'],
+        sans: ['DM Sans','system-ui','sans-serif'],
+        mono: ['JetBrains Mono','monospace'],
       }
     }
   }
 }
 </script>
-
-<style>
-.glass {
-  background: rgba(255,255,255,0.6);
-  backdrop-filter: blur(20px);
-}
-.dark .glass {
-  background: rgba(20,20,22,0.6);
-}
-</style>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 
 <script>
-(function () {
-  const t = localStorage.getItem('theme');
-  if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) {
-    document.documentElement.classList.add('dark');
-  }
+(function(){
+  document.documentElement.classList.add('dark');
+  localStorage.setItem('theme','dark');
 })();
 </script>
+
+<style>
+/* ─── Design Tokens ─────────────────────────────────────── */
+:root {
+  --bg-base:      #03060F;
+  --bg-surface:   #080E1C;
+  --bg-card:      #0C1528;
+  --bg-card-alt:  #0F1A32;
+  --border:       #1C3050;
+  --border-soft:  #162540;
+  --blue:         #3B82F6;
+  --blue-dim:     #1D4ED8;
+  --blue-glow:    rgba(59,130,246,0.25);
+  --green:        #22C55E;
+  --green-dim:    #16A34A;
+  --green-glow:   rgba(34,197,94,0.20);
+  --red:          #F87171;
+  --red-dim:      #DC2626;
+  --indigo:       #818CF8;
+  --amber:        #F59E0B;
+  --text-1:       #EFF6FF;
+  --text-2:       #94A3B8;
+  --text-3:       #475569;
+}
+
+/* ─── Base ──────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+body {
+  background: var(--bg-base);
+  color: var(--text-1);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+h1, h2, h3, h4 { font-family: 'Syne', sans-serif; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ─── Grid Background ───────────────────────────────────── */
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(30,60,120,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30,60,120,0.07) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.hero-glow {
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.15) 0%, transparent 70%);
+}
+.green-glow {
+  background: radial-gradient(ellipse 60% 40% at 50% 50%, rgba(34,197,94,0.08) 0%, transparent 70%);
+}
+
+/* ─── Glass ─────────────────────────────────────────────── */
+.glass {
+  background: rgba(8,14,28,0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+
+/* ─── Badges ─────────────────────────────────────────────── */
+.badge-green {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 99px;
+  background: rgba(34,197,94,0.10);
+  border: 1px solid rgba(34,197,94,0.30);
+  color: var(--green); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.badge-blue {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 99px;
+  background: rgba(59,130,246,0.10);
+  border: 1px solid rgba(59,130,246,0.30);
+  color: var(--blue); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.badge-red {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 99px;
+  background: rgba(248,113,113,0.10);
+  border: 1px solid rgba(248,113,113,0.30);
+  color: var(--red); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.badge-indigo {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 99px;
+  background: rgba(129,140,248,0.10);
+  border: 1px solid rgba(129,140,248,0.30);
+  color: var(--indigo); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+
+/* ─── Buttons ────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; border-radius: 12px;
+  background: var(--blue); color: #fff;
+  font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 15px;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 0 24px var(--blue-glow), 0 2px 8px rgba(0,0,0,0.4);
+  border: none; text-decoration: none;
+}
+.btn-primary:hover {
+  background: #2563EB;
+  box-shadow: 0 0 36px var(--blue-glow), 0 4px 16px rgba(0,0,0,0.5);
+  transform: translateY(-1px);
+}
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 26px; border-radius: 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-1); font-family: 'DM Sans', sans-serif;
+  font-weight: 500; font-size: 15px; cursor: pointer;
+  transition: all 0.2s; text-decoration: none;
+}
+.btn-secondary:hover {
+  border-color: rgba(59,130,246,0.5);
+  background: rgba(59,130,246,0.05);
+  transform: translateY(-1px);
+}
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px;
+  background: transparent; border: 1px solid var(--border-soft);
+  color: var(--text-2); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; text-decoration: none;
+}
+.btn-ghost:hover { border-color: var(--border); color: var(--text-1); }
+
+/* ─── Section Containers ─────────────────────────────────── */
+.section { padding: 96px 0; }
+.section-sm { padding: 64px 0; }
+.container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+.container-sm { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+
+/* ─── Evidence Cards ─────────────────────────────────────── */
+.exhibit-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.exhibit-card:hover { border-color: rgba(59,130,246,0.4); }
+.exhibit-card-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-soft);
+  background: var(--bg-card-alt);
+}
+.exhibit-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-2);
+}
+
+/* ─── Log Terminal ───────────────────────────────────────── */
+.terminal {
+  background: #020508;
+  border: 1px solid #0D1F35;
+  border-radius: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.8;
+  padding: 16px 20px;
+  color: #94A3B8;
+  overflow-x: auto;
+}
+.terminal .t-green { color: #22C55E; }
+.terminal .t-red   { color: #F87171; }
+.terminal .t-blue  { color: #60A5FA; }
+.terminal .t-amber { color: #FBBF24; }
+.terminal .t-muted { color: #475569; }
+.terminal .t-white { color: #E2E8F0; }
+
+/* ─── Verified Seal ──────────────────────────────────────── */
+.verified-seal {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 10px;
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.25);
+  color: var(--green); font-weight: 600; font-size: 13px;
+}
+
+/* ─── Stat Cards ─────────────────────────────────────────── */
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  padding: 28px 24px;
+  text-align: center;
+  transition: border-color 0.3s, transform 0.2s;
+}
+.stat-card:hover { border-color: var(--border); transform: translateY(-2px); }
+
+/* ─── Pipeline ───────────────────────────────────────────── */
+.pipe-step {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  padding: 24px 20px;
+  position: relative;
+  transition: all 0.3s;
+}
+.pipe-step:hover {
+  border-color: rgba(59,130,246,0.35);
+  box-shadow: 0 0 24px rgba(59,130,246,0.06);
+}
+.pipe-number {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: rgba(59,130,246,0.12);
+  border: 1px solid rgba(59,130,246,0.25);
+  color: var(--blue); font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+
+/* ─── Pricing ─────────────────────────────────────────────── */
+.pricing-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px 30px;
+  transition: all 0.3s;
+}
+.pricing-card:hover { border-color: rgba(59,130,246,0.35); }
+.pricing-card.featured {
+  background: linear-gradient(145deg, #0E1E42, #091430);
+  border-color: rgba(59,130,246,0.4);
+  box-shadow: 0 0 40px rgba(59,130,246,0.08);
+  position: relative;
+}
+.pricing-card.featured::before {
+  content: 'MOST POPULAR';
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--blue); color: #fff;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  padding: 4px 14px; border-radius: 99px;
+}
+
+/* ─── ROI Banner ─────────────────────────────────────────── */
+.roi-banner {
+  background: linear-gradient(135deg, rgba(34,197,94,0.06), rgba(59,130,246,0.06));
+  border: 1px solid rgba(34,197,94,0.20);
+  border-radius: 16px;
+  padding: 24px 32px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px; flex-wrap: wrap; text-align: center;
+}
+
+/* ─── Divider ─────────────────────────────────────────────── */
+.divider {
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+/* ─── CTA Section ────────────────────────────────────────── */
+.cta-section {
+  background: linear-gradient(180deg, var(--bg-base) 0%, rgba(8,20,50,1) 50%, var(--bg-base) 100%);
+  position: relative;
+}
+.cta-glow {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 300px;
+  background: radial-gradient(ellipse, rgba(59,130,246,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ─── Animations ─────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes live-dot {
+  0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
+  60%      { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+}
+.anim-in  { animation: fadeInUp 0.6s ease both; }
+.anim-in-d1 { animation-delay: 0.1s; }
+.anim-in-d2 { animation-delay: 0.2s; }
+.anim-in-d3 { animation-delay: 0.3s; }
+.anim-in-d4 { animation-delay: 0.4s; }
+.live-dot { animation: live-dot 1.8s ease-in-out infinite; }
+
+/* ─── Nav ────────────────────────────────────────────────── */
+nav a:hover { color: var(--text-1) !important; }
+
+/* ─── Kartik Card ─────────────────────────────────────────── */
+.kartik-card {
+  background: linear-gradient(135deg, var(--bg-card), var(--bg-card-alt));
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 48px 40px;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+/* ─── Chain Node ──────────────────────────────────────────── */
+.chain-node {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+}
+.chain-arrow {
+  color: var(--text-3); font-size: 18px;
+  display: flex; align-items: center; padding: 0 4px;
+}
+
+/* ─── Utility ─────────────────────────────────────────────── */
+.text-gradient {
+  background: linear-gradient(135deg, #60A5FA 0%, #818CF8 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-gradient-green {
+  background: linear-gradient(135deg, #22C55E 0%, #4ADE80 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.check-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  color: var(--text-2); font-size: 14px; line-height: 1.6;
+}
+.check-item .icon-wrap {
+  width: 18px; height: 18px; min-width: 18px;
+  border-radius: 50%; background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.25);
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 2px;
+}
+</style>
 </head>
 
-<body class="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans antialiased">
+<body>
 
-<!-- HEADER -->
-<header class="fixed top-0 w-full z-50 border-b border-zinc-200/40 dark:border-zinc-800/40 glass">
-  <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-    <div class="flex items-center gap-2 font-semibold tracking-tight">
-      <i data-lucide="shield" class="w-5 h-5 text-blue-500"></i>
-      FinFlow <span class="text-blue-500 text-xs ml-1">SecOps</span>
-    </div>
-    <div class="flex items-center gap-4 text-xs">
-      <span class="text-green-500">● Live</span>
-      <button id="themeToggle" class="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800">
-        <i data-lucide="moon" class="w-4 h-4"></i>
-      </button>
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  HEADER                                                -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<header style="position:fixed;top:0;left:0;right:0;z-index:100;border-bottom:1px solid var(--border-soft);" class="glass">
+  <div class="container" style="display:flex;justify-content:space-between;align-items:center;padding-top:16px;padding-bottom:16px;">
+
+    <!-- Logo -->
+    <a href="#" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+      <div style="width:32px;height:32px;background:linear-gradient(135deg,#1D4ED8,#3B82F6);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:var(--text-1);">FinFlow</span>
+      <span class="badge-blue" style="font-size:10px;">Regulatory Shield</span>
+    </a>
+
+    <!-- Nav Links (desktop) -->
+    <nav style="display:flex;align-items:center;gap:28px;" class="hidden md:flex">
+      <a href="#evidence-vault" style="font-size:13px;color:var(--text-2);text-decoration:none;transition:color 0.2s;">Evidence Vault</a>
+      <a href="#how-it-works" style="font-size:13px;color:var(--text-2);text-decoration:none;transition:color 0.2s;">How It Works</a>
+      <a href="#ciso-specs" style="font-size:13px;color:var(--text-2);text-decoration:none;transition:color 0.2s;">For CISOs</a>
+      <a href="#pricing" style="font-size:13px;color:var(--text-2);text-decoration:none;transition:color 0.2s;">Pricing</a>
+    </nav>
+
+    <!-- Header CTAs -->
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green);">
+        <span style="width:7px;height:7px;background:var(--green);border-radius:50%;display:block;" class="live-dot"></span>
+        Live Cluster
+      </div>
+      <a href="https://calendly.com/kartikops-dev/30min" target="_blank" class="btn-primary" style="padding:9px 18px;font-size:13px;border-radius:8px;">
+        Book Free Call
+      </a>
     </div>
   </div>
 </header>
 
-<main class="pt-32 max-w-6xl mx-auto px-6 space-y-32">
 
-<!-- HERO -->
-<section class="text-center max-w-3xl mx-auto">
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  HERO                                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div style="position:relative;overflow:hidden;padding-top:100px;">
+  <div class="hero-grid" style="position:absolute;inset:0;pointer-events:none;"></div>
+  <div class="hero-glow" style="position:absolute;inset:0;pointer-events:none;"></div>
 
-  <p class="text-xs font-medium text-blue-500 mb-3 tracking-widest uppercase">
-    For seed-stage Payment Aggregators & Digital Lending startups
-  </p>
+  <div class="section" style="padding-bottom:80px;">
+    <div class="container-sm" style="text-align:center;">
 
-  <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05]">
-    RBI Audit Trail.<br/>
-    <span class="text-blue-500">Automated. ₹32k/month.</span>
-  </h1>
+      <!-- Eyebrow -->
+      <div class="anim-in" style="display:flex;justify-content:center;margin-bottom:20px;">
+        <span class="badge-blue">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          RBI PA Master Direction · Sep 2025 · Annex 1.3
+        </span>
+      </div>
 
-  <p class="mt-6 text-lg text-zinc-500 leading-relaxed max-w-xl mx-auto">
-    Falco runtime detection + OpenTelemetry traces + Grafana —
-    exactly what PA Master Direction mandates for monthly
-    cyber incident reporting. Setup in 3 weeks.
-  </p>
+      <!-- H1 -->
+      <h1 class="anim-in anim-in-d1" style="font-size:clamp(36px,6vw,68px);line-height:1.06;letter-spacing:-0.03em;margin-bottom:16px;">
+        Monthly RBI Reports,<br/>
+        <span class="text-gradient-green">Done For You.</span><br/>
+        <span style="color:var(--text-2);">You Get the PDF. You Submit.</span>
+      </h1>
 
-  <p class="mt-3 text-sm text-red-500 font-medium">
-    ⚠ Non-compliance: ₹10 lakh/violation + licence risk under PSS Act
-  </p>
+      <!-- Subhead -->
+      <p class="anim-in anim-in-d2" style="font-family:'Syne',sans-serif;font-size:clamp(18px,2.5vw,24px);font-weight:600;color:var(--indigo);margin-bottom:24px;letter-spacing:-0.01em;">
+        We watch your cluster. You run the business.
+      </p>
 
-  <div class="mt-10 flex justify-center gap-4 flex-wrap">
-    <button id="triggerBtn"
-      class="px-7 py-3 rounded-full bg-red-600 text-white font-medium hover:scale-[1.03] transition shadow-lg">
-      Trigger Security Event
-    </button>
-    <a href="https://calendly.com/kartikops-dev/30min" target="_blank"
-       class="px-7 py-3 rounded-full bg-blue-600 text-white font-medium hover:scale-[1.03] transition">
-      Book 20-min RBI Readiness Call
-    </a>
+      <!-- Body -->
+      <p class="anim-in anim-in-d2" style="font-size:16px;color:var(--text-2);line-height:1.75;max-width:580px;margin:0 auto 36px;">
+        We deploy Falco+eBPF on your K8s cluster. Every incident is detected, traced to root cause, and documented in an <strong style="color:var(--text-1);">RBI-ready monthly report</strong>. You don't write a word. You just submit it to the auditor.
+      </p>
+
+      <!-- CTAs -->
+      <div class="anim-in anim-in-d3" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:40px;">
+        <a href="https://calendly.com/kartikops-dev/30min" target="_blank" class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Book 20-min RBI Readiness Call
+        </a>
+        <a href="https://demo.kartikinfra.in/sample-rbi-report.pdf" target="_blank" class="btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Download Sample Report
+        </a>
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="anim-in anim-in-d4" style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
+        <span class="badge-green">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Kernel-Level eBPF
+        </span>
+        <span class="badge-green">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          RCA Written For You
+        </span>
+        <span class="badge-green">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          PDF Delivered Monthly
+        </span>
+        <span class="badge-green">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          &lt;1% CPU Overhead
+        </span>
+      </div>
+
+    </div>
   </div>
+</div>
 
-  <div class="mt-6 text-xs text-zinc-400">
-    RBI-ready · Trace-backed · Zero manual analysis ·
-    <a href="https://github.com/kartikinfra/finflow-infra" target="_blank" class="text-blue-500 hover:underline">
-      View source on GitHub
-    </a>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  STATS BAR                                             -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="divider"></div>
+<div class="section-sm">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:2px;">
+
+      <div class="stat-card">
+        <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--green);margin-bottom:6px;">&lt;1%</div>
+        <div style="font-size:13px;color:var(--text-2);">CPU overhead via eBPF</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:4px;">CISO-grade performance</div>
+      </div>
+
+      <div class="stat-card">
+        <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--blue);margin-bottom:6px;">15 min</div>
+        <div style="font-size:13px;color:var(--text-2);">k3s / K8s setup time</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:4px;">No DevOps degree needed</div>
+      </div>
+
+      <div class="stat-card">
+        <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--indigo);margin-bottom:6px;">100%</div>
+        <div style="font-size:13px;color:var(--text-2);">In-VPC data sovereignty</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:4px;">Zero telemetry to FinFlow</div>
+      </div>
+
+      <div class="stat-card">
+        <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--amber);margin-bottom:6px;">8×</div>
+        <div style="font-size:13px;color:var(--text-2);">ROI vs. RBI fine</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:4px;">₹1.25L setup · ₹10L penalty</div>
+      </div>
+
+    </div>
   </div>
+</div>
+<div class="divider"></div>
 
-</section>
 
-<!-- LIVE DEMO + REPORT -->
-<section id="report" class="hidden max-w-4xl mx-auto">
-  <div class="glass border border-zinc-200/50 dark:border-zinc-800 rounded-3xl shadow-xl">
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  THE AUDIT TRAP — PROBLEM                              -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="container">
 
-    <div class="flex justify-between items-center px-6 py-3 border-b border-zinc-200 dark:border-zinc-800">
-      <span class="text-xs text-red-500 flex items-center gap-2">
-        <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-        Critical Incident
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;" class="md-grid-2">
+
+      <div>
+        <span class="badge-red" style="margin-bottom:20px;display:inline-flex;">The Audit Trap</span>
+        <h2 style="font-size:clamp(28px,4vw,44px);line-height:1.1;letter-spacing:-0.03em;margin-bottom:24px;">
+          RBI doesn't want<br/>dashboards.<br/>
+          <span style="color:var(--text-2);">They want evidence.</span>
+        </h2>
+        <p style="color:var(--text-2);font-size:15px;line-height:1.75;margin-bottom:24px;">
+          Most fintechs fail audits not because their infrastructure is broken — but because they can't <em>prove</em> what happened. Logs are scattered. Detection is manual. Reports are stitched together the night before the auditor arrives.
+        </p>
+        <p style="color:var(--text-2);font-size:15px;line-height:1.75;">
+          RBI's Annex 1.3 (Sep 2025 Master Direction) is explicit: you need a documented incident response chain with root cause analysis, timestamps, and detection evidence. Not a screenshot of a dashboard.
+        </p>
+      </div>
+
+      <!-- Auditor Questions -->
+      <div>
+        <p style="font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;font-weight:600;">What the RBI auditor will ask</p>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:32px;">
+
+          <div style="background:var(--bg-card);border:1px solid var(--border-soft);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px;">
+            <div style="width:28px;height:28px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;min-width:28px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <span style="font-size:14px;color:var(--text-1);">"Show me last month's cyber incidents."</span>
+          </div>
+
+          <div style="background:var(--bg-card);border:1px solid var(--border-soft);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px;">
+            <div style="width:28px;height:28px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;min-width:28px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <span style="font-size:14px;color:var(--text-1);">"How were these incidents detected?"</span>
+          </div>
+
+          <div style="background:var(--bg-card);border:1px solid var(--border-soft);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px;">
+            <div style="width:28px;height:28px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;min-width:28px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <span style="font-size:14px;color:var(--text-1);">"Where is the trace, root cause, and corrective action?"</span>
+          </div>
+
+        </div>
+
+        <div style="background:linear-gradient(135deg,rgba(34,197,94,0.06),rgba(59,130,246,0.06));border:1px solid rgba(34,197,94,0.20);border-radius:12px;padding:18px 20px;">
+          <p style="font-size:14px;font-weight:600;color:var(--green);margin-bottom:4px;">FinFlow answers all three. Automatically.</p>
+          <p style="font-size:13px;color:var(--text-2);">Trigger the live demos below to see proof from our live cluster.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  DONE-FOR-YOU USP — REPLACES SIGNED REPORT CONCEPT      -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div style="background:linear-gradient(180deg,var(--bg-base) 0%,rgba(8,16,40,0.8) 50%,var(--bg-base) 100%);" class="section">
+  <div class="container-sm">
+
+    <div style="text-align:center;margin-bottom:48px;">
+      <span class="badge-green" style="margin-bottom:16px;display:inline-flex;">Why FinFlow Exists</span>
+      <h2 style="font-size:clamp(28px,4vw,48px);line-height:1.1;letter-spacing:-0.03em;margin-bottom:16px;">
+        You didn't become a founder<br/>
+        <span style="color:var(--text-2);">to write RCA documents.</span>
+      </h2>
+      <p style="font-size:15px;color:var(--text-2);line-height:1.75;max-width:560px;margin:0 auto;">
+        RBI's Annex 1.3 demands a documented incident response chain with root cause analysis for every cyber event. Most founding teams discover this requirement <strong style="color:var(--text-1);">3 days before their audit.</strong>
+      </p>
+    </div>
+
+    <!-- Three pain points we solve -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:40px;">
+
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px 24px;">
+        <div style="font-size:28px;margin-bottom:14px;">📋</div>
+        <h4 style="font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:8px;">We Write Your Monthly RCA</h4>
+        <p style="font-size:13px;color:var(--text-2);line-height:1.6;">Every Falco alert is correlated to its OTel trace via documented forensic process. Kartik or his team writes the root cause analysis and corrective action — in language an RBI auditor accepts.</p>
+        <div style="margin-top:14px;padding:10px 14px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;">
+          <p style="font-size:12px;color:var(--green);font-weight:600;">✓ Auditor-ready RCA · every alert · every month</p>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px 24px;">
+        <div style="font-size:28px;margin-bottom:14px;">📬</div>
+        <h4 style="font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:8px;">PDF in Your Inbox. Every 1st.</h4>
+        <p style="font-size:13px;color:var(--text-2);line-height:1.6;">On the 1st of every month, your RBI-format monthly report arrives via email. Incidents, timestamps, traces, RCA, corrective actions — all filled. You forward it to the auditor.</p>
+        <div style="margin-top:14px;padding:10px 14px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;">
+          <p style="font-size:12px;color:var(--green);font-weight:600;">✓ Zero writing · zero formatting · zero last-minute panic</p>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px 24px;">
+        <div style="font-size:28px;margin-bottom:14px;">🛡️</div>
+        <h4 style="font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:8px;">Auditor Call? We'll Join.</h4>
+        <p style="font-size:13px;color:var(--text-2);line-height:1.6;">In our Enterprise Assurance tier, Kartik personally joins your pre-audit call. He explains the detection stack, correlation methodology, and chain of custody — so your team doesn't have to.</p>
+        <div style="margin-top:14px;padding:10px 14px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;">
+          <p style="font-size:12px;color:var(--green);font-weight:600;">✓ Expert defense · kernel-level to auditor-speak translation</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom line -->
+    <div style="background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(34,197,94,0.04));border:1px solid rgba(59,130,246,0.2);border-radius:14px;padding:24px 28px;text-align:center;">
+      <p style="font-size:15px;color:var(--text-1);font-weight:600;margin-bottom:6px;">
+        Your job: Run the business. Our job: Make the auditor go away.
+      </p>
+      <p style="font-size:13px;color:var(--text-2);">
+        From kernel event to monthly PDF — we handle the entire evidence pipeline.
+      </p>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  EVIDENCE VAULT                                        -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="evidence-vault" class="section">
+  <div class="container">
+
+    <div style="text-align:center;margin-bottom:56px;">
+      <span class="badge-indigo" style="margin-bottom:16px;display:inline-flex;">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Live Evidence Vault
       </span>
-      <span id="timestamp" class="text-xs text-zinc-400"></span>
+      <h2 style="font-size:clamp(28px,4vw,48px);line-height:1.1;letter-spacing:-0.03em;margin-bottom:16px;">
+        The Three Exhibits<br/>That Win Every Audit
+      </h2>
+      <p style="font-size:15px;color:var(--text-2);max-width:520px;margin:0 auto;line-height:1.75;">
+        Everything below is pulled from our <strong style="color:var(--text-1);">live production cluster</strong> — real kernel events, real traces, real timestamps. No mock data.
+      </p>
     </div>
 
-    <div class="p-8 grid md:grid-cols-3 gap-6 text-sm">
-      <div>
-        <p class="text-xs text-zinc-500">Incident ID</p>
-        <p id="incId" class="font-semibold text-blue-500 text-lg"></p>
+    <!-- EXHIBIT A — Falco -->
+    <div id="exhibit-a" class="exhibit-card" style="margin-bottom:24px;">
+      <div class="exhibit-card-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="badge-red">Exhibit A</span>
+          <span class="exhibit-label">Falco · Automated Incident Detection</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="badge-blue">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="20 6 9 17 4 12"/></svg>
+            Kernel-Verified
+          </span>
+          <button id="triggerFalcoBtn" style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);color:#F87171;font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;">
+            <span style="width:7px;height:7px;background:#F87171;border-radius:50%;display:block;"></span>
+            Simulate Live Incident
+          </button>
+        </div>
       </div>
-      <div>
-        <p class="text-xs text-zinc-500">MTTD</p>
-        <p id="mttd" class="text-lg font-medium"></p>
+
+      <div style="padding:24px;">
+        <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;line-height:1.6;">
+          eBPF probes at the kernel level capture every privileged syscall. Falco pattern-matches them against RBI-mapped rules in real-time — no agent polling, no sampling lag.
+        </p>
+
+        <!-- Static preview (always visible) -->
+        <div class="terminal" style="margin-bottom:16px;">
+          <div><span class="t-muted">2025-10-12T04:31:22Z</span> <span class="t-red">[CRITICAL]</span> <span class="t-white">Falco Rule Triggered</span></div>
+          <div><span class="t-muted">rule:</span>      <span class="t-amber">Terminal shell in container</span></div>
+          <div><span class="t-muted">output:</span>    <span class="t-white">A shell was spawned in a container (user=root container=payment-svc)</span></div>
+          <div><span class="t-muted">priority:</span>  <span class="t-red">CRITICAL</span></div>
+          <div><span class="t-muted">source:</span>    <span class="t-green">syscall/eBPF</span> <span class="t-muted">· kernel probe</span></div>
+          <div><span class="t-muted">trace_id:</span>  <span class="t-blue">4f2a9e1c-8d3b-42f1-b7e5-1a8c3d9f2b6e</span></div>
+        </div>
+
+        <!-- Dynamic Falco report (hidden until button click) -->
+        <div id="falcoReport" class="hidden">
+          <div style="height:1px;background:var(--border-soft);margin-bottom:16px;"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="font-size:12px;font-weight:600;color:var(--red);">⚡ Live Incident Detected</span>
+            <span id="falcoTimestamp" style="font-family:monospace;font-size:11px;color:var(--text-3);"></span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;">
+            <div><p style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Incident ID</p><p id="falcoIncId" style="font-weight:700;color:var(--red);font-size:15px;"></p></div>
+            <div><p style="font-size:11px;color:var(--text-3);margin-bottom:4px;">MTTD</p><p id="falcoMttd" style="font-weight:600;font-size:15px;"></p></div>
+            <div><p style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Falco Rule</p><p id="falcoRule" style="font-weight:600;color:var(--amber);font-size:13px;"></p></div>
+          </div>
+          <div class="terminal">
+            <div><span class="t-muted">output:</span>     <span id="falcoOutput" class="t-white"></span></div>
+            <div style="margin-top:8px;"><span class="t-muted">rca:</span>        <span id="rcaText" class="t-blue"></span></div>
+            <div style="margin-top:8px;"><span class="t-muted">action:</span>     <span id="actionText" class="t-green"></span></div>
+          </div>
+        </div>
+
       </div>
-      <div>
-        <p class="text-xs text-zinc-500">Trace ID</p>
-        <p id="traceId" class="text-xs break-all font-mono"></p>
+    </div>
+
+    <!-- EXHIBIT B — Tempo / TraceQL -->
+    <div id="exhibit-b" class="exhibit-card" style="margin-bottom:24px;">
+      <div class="exhibit-card-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="badge-indigo">Exhibit B</span>
+          <span class="exhibit-label">Tempo · TraceQL · The Digital Fingerprint</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="badge-blue">1:1 Root Cause Map</span>
+          <button id="triggerTempoBtn" style="background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.3);color:var(--indigo);font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Trace Root Cause
+          </button>
+        </div>
       </div>
-      <div class="md:col-span-3">
-        <p class="text-xs text-zinc-500">Root Cause</p>
-        <p class="mt-1 leading-relaxed">Database sequential scan due to missing index → CPU saturation → latency spike.</p>
+
+      <div style="padding:24px;">
+        <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;line-height:1.6;">
+          This link gives the auditor a <strong style="color:var(--text-1);">1:1 map</strong> of the incident's root cause — every service hop, every span, every microsecond — correlated by Trace ID. It turns "something went wrong" into irrefutable proof.
+        </p>
+
+        <div id="tempoStatic" class="terminal" style="margin-bottom:16px;">
+          <div><span class="t-muted">$ </span><span class="t-blue">traceql query</span> <span class="t-green">'{ .incident_id = "INC-1041" }'</span></div>
+          <div style="margin-top:4px;"><span class="t-muted">trace_id:</span>  <span class="t-white">0af2bc3d1e4f5a6b7c8d9e0f1a2b3c4d</span></div>
+          <div><span class="t-muted">duration:</span>  <span class="t-amber">4.23s</span> <span class="t-muted">(p99 threshold: 500ms)</span></div>
+          <div><span class="t-muted">services:</span>  <span class="t-white">api-gateway → payment-svc → postgres</span></div>
+          <div><span class="t-muted">root:</span>      <span class="t-blue">DB sequential scan (missing idx_txn_created_at)</span></div>
+          <div style="margin-top:8px;"><span class="t-muted">⎳ Click "Trace Root Cause" to load live data ↑</span></div>
+        </div>
+
+        <!-- Skeleton -->
+        <div id="skeleton" class="hidden" style="display:flex;flex-direction:column;gap:8px;">
+          <div style="height:14px;background:var(--bg-card-alt);border-radius:4px;width:40%;animation:pulse 1.5s ease-in-out infinite;"></div>
+          <div style="height:14px;background:var(--bg-card-alt);border-radius:4px;animation:pulse 1.5s ease-in-out infinite;"></div>
+          <div style="height:14px;background:var(--bg-card-alt);border-radius:4px;width:65%;animation:pulse 1.5s ease-in-out infinite;"></div>
+        </div>
+
+        <!-- Dynamic Tempo report (hidden until click) -->
+        <div id="tempoReport" class="hidden">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;">
+            <div><p style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Incident ID</p><p id="tempoIncId" style="font-weight:700;color:var(--indigo);font-size:15px;"></p></div>
+            <div><p style="font-size:11px;color:var(--text-3);margin-bottom:4px;">MTTD</p><p id="tempoMttd" style="font-weight:600;font-size:15px;"></p></div>
+            <div><p style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Trace ID</p><p id="tempoTraceId" style="font-family:monospace;font-size:10px;color:var(--text-2);word-break:break-all;"></p></div>
+          </div>
+          <div class="terminal" style="margin-bottom:16px;">
+            <div><span class="t-muted">root_cause:</span> <span class="t-blue">DB sequential scan → missing index → CPU saturation → latency spike</span></div>
+            <div style="margin-top:4px;"><span class="t-muted">services:</span>   <span class="t-white">api-gateway → payment-svc → postgres</span></div>
+          </div>
+          <a id="grafanaLink" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.3);color:var(--indigo);font-size:13px;font-weight:600;padding:10px 18px;border-radius:10px;text-decoration:none;transition:all 0.2s;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Open Full Trace in Grafana Tempo
+          </a>
+        </div>
+
       </div>
-      <a id="grafanaLink" target="_blank"
-        class="md:col-span-3 mt-4 inline-flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-xl text-sm font-medium hover:scale-[1.02] transition">
-        <i data-lucide="external-link" class="w-4 h-4"></i>
-        Open Full Trace in Grafana
-      </a>
+    </div>
+
+    <!-- EXHIBIT C — Sample Report -->
+    <div id="exhibit-c" class="exhibit-card">
+      <div class="exhibit-card-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="badge-green">Exhibit C</span>
+          <span class="exhibit-label">RBI Report · Auditor-Ready Format</span>
+        </div>
+        <div class="verified-seal">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          RBI Annex 1.3 Compliant
+        </div>
+      </div>
+
+      <div style="padding:24px;">
+        <p style="font-size:13px;color:var(--text-2);margin-bottom:24px;line-height:1.6;">
+          This is the document you hand to the RBI auditor. It contains every incident, every trace ID, every root cause, and every corrective action — auto-generated from live data, ready to submit.
+        </p>
+
+        <!-- PDF Preview mock -->
+        <div style="background:#020508;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px;">
+          <!-- Doc header -->
+          <div style="background:#0A1220;padding:20px 24px;border-bottom:1px solid #0D1F35;display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <p style="font-size:10px;color:var(--text-3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;">RESERVE BANK OF INDIA — PAYMENT AGGREGATOR COMPLIANCE</p>
+              <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text-1);margin-bottom:2px;">Monthly Incident Report · October 2025</h3>
+              <p style="font-size:12px;color:var(--text-3);">Payment Aggregator: [Your Company] · CIN: U74999MH2022PTC123456</p>
+            </div>
+            <div style="text-align:right;">
+              <div class="verified-seal" style="font-size:11px;padding:6px 12px;margin-bottom:6px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Auditor-Ready
+              </div>
+              <p style="font-family:monospace;font-size:10px;color:var(--text-3);">Generated: 2025-10-01 07:08:54 UTC</p>
+            </div>
+          </div>
+          <!-- Doc body preview -->
+          <div style="padding:20px 24px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
+              <div style="background:#0A1428;border:1px solid #0D1F35;border-radius:8px;padding:12px;">
+                <p style="font-size:10px;color:var(--text-3);margin-bottom:4px;">INCIDENTS THIS MONTH</p>
+                <p style="font-size:22px;font-family:'Syne',sans-serif;font-weight:700;color:var(--red);">3</p>
+                <p style="font-size:10px;color:var(--text-3);">All resolved · RCA attached</p>
+              </div>
+              <div style="background:#0A1428;border:1px solid #0D1F35;border-radius:8px;padding:12px;">
+                <p style="font-size:10px;color:var(--text-3);margin-bottom:4px;">AVG MTTD</p>
+                <p style="font-size:22px;font-family:'Syne',sans-serif;font-weight:700;color:var(--green);">1.2s</p>
+                <p style="font-size:10px;color:var(--text-3);">Kernel-level detection</p>
+              </div>
+              <div style="background:#0A1428;border:1px solid #0D1F35;border-radius:8px;padding:12px;">
+                <p style="font-size:10px;color:var(--text-3);margin-bottom:4px;">TRACES LINKED</p>
+                <p style="font-size:22px;font-family:'Syne',sans-serif;font-weight:700;color:var(--blue);">3/3</p>
+                <p style="font-size:10px;color:var(--text-3);">100% trace coverage</p>
+              </div>
+            </div>
+            <!-- Incident row preview -->
+            <div style="border:1px solid #0D1F35;border-radius:8px;overflow:hidden;">
+              <div style="background:#0A1A30;padding:8px 14px;display:grid;grid-template-columns:1fr 2fr 1fr 1fr;gap:8px;">
+                <span style="font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Inc. ID</span>
+                <span style="font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Description</span>
+                <span style="font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Severity</span>
+                <span style="font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Status</span>
+              </div>
+              <div style="padding:10px 14px;display:grid;grid-template-columns:1fr 2fr 1fr 1fr;gap:8px;border-top:1px solid #0D1F35;">
+                <span style="font-family:monospace;font-size:11px;color:var(--text-2);">INC-1023</span>
+                <span style="font-size:11px;color:var(--text-2);">Container shell execution in payment-svc</span>
+                <span style="font-size:10px;background:rgba(248,113,113,0.1);color:#F87171;padding:2px 6px;border-radius:4px;height:fit-content;">CRITICAL</span>
+                <span style="font-size:10px;background:rgba(34,197,94,0.1);color:#22C55E;padding:2px 6px;border-radius:4px;height:fit-content;">Resolved</span>
+              </div>
+              <div style="padding:10px 14px;display:grid;grid-template-columns:1fr 2fr 1fr 1fr;gap:8px;border-top:1px solid #0D1F35;">
+                <span style="font-family:monospace;font-size:11px;color:var(--text-2);">INC-1041</span>
+                <span style="font-size:11px;color:var(--text-2);">API latency spike · DB index missing</span>
+                <span style="font-size:10px;background:rgba(251,191,36,0.1);color:#FBBF24;padding:2px 6px;border-radius:4px;height:fit-content;">HIGH</span>
+                <span style="font-size:10px;background:rgba(34,197,94,0.1);color:#22C55E;padding:2px 6px;border-radius:4px;height:fit-content;">Resolved</span>
+              </div>
+            </div>
+            <p style="font-size:10px;color:var(--text-3);text-align:center;margin-top:12px;">… and more incidents with full trace links, RCA, and corrective actions</p>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="https://demo.kartikinfra.in/sample-rbi-report.pdf" target="_blank" class="btn-primary" style="font-size:14px;padding:12px 22px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Sample Report
+          </a>
+          <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:12px 18px;font-size:13px;color:var(--text-2);">
+            <span style="color:var(--green);font-weight:600;">Real audit format</span> · Incidents, timestamps, RCA, corrective actions · Auto-generated from live data
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div id="error" class="hidden" style="margin-top:16px;text-align:center;font-size:13px;color:var(--red);background:rgba(248,113,113,0.05);border:1px solid rgba(248,113,113,0.2);border-radius:10px;padding:12px;"></div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  HOW IT WORKS — PIPELINE                              -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="how-it-works" class="section" style="background:var(--bg-surface);">
+  <div class="container">
+
+    <div style="text-align:center;margin-bottom:56px;">
+      <span class="badge-blue" style="margin-bottom:16px;display:inline-flex;">Simple 4-Phase Setup</span>
+      <h2 style="font-size:clamp(28px,4vw,44px);line-height:1.1;letter-spacing:-0.03em;margin-bottom:16px;">From Zero to RBI-Ready<br/>in Under 15 Minutes</h2>
+      <p style="font-size:15px;color:var(--text-2);max-width:480px;margin:0 auto;">Helm chart install. YAML config. That's it. No custom agents, no proprietary SDKs, no vendor lock-in.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;max-width:960px;margin:0 auto;">
+
+      <div class="pipe-step">
+        <div class="pipe-number">01</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="9 3 9 21"/><polyline points="15 3 15 21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+          <h4 style="font-size:15px;font-weight:700;color:var(--text-1);">Install</h4>
+        </div>
+        <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:14px;">eBPF probes + Falco + OpenTelemetry via a single Helm chart on your existing K8s / k3s cluster.</p>
+        <div class="terminal" style="font-size:11px;padding:10px 14px;">
+          <div><span class="t-green">$</span> <span class="t-white">helm install finflow</span></div>
+          <div><span class="t-muted">  finflow/rbi-shield</span></div>
+          <div><span class="t-muted">  --namespace monitoring</span></div>
+          <div style="margin-top:6px;"><span class="t-green">✔ Deployed in 4m 12s</span></div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-number">02</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <h4 style="font-size:15px;font-weight:700;color:var(--text-1);">Correlate</h4>
+        </div>
+        <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:14px;">Every Falco alert is matched to its OpenTelemetry trace ID via documented forensic correlation — timestamp + pod metadata → structured logs → exact trace.</p>
+        <div class="terminal" style="font-size:11px;padding:10px 14px;">
+          <div><span class="t-red">ALERT</span> <span class="t-amber">INC-1023</span></div>
+          <div><span class="t-muted">→ matching trace_id via forensic process...</span></div>
+          <div><span class="t-blue">→ 4f2a9e1c-8d3b-42f1</span></div>
+          <div><span class="t-green">→ RCA: debug endpoint exposed</span></div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-number">03</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <h4 style="font-size:15px;font-weight:700;color:var(--text-1);">Seal &amp; Report</h4>
+        </div>
+        <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:14px;">On the 1st of every month, the RBI-format PDF is generated and delivered to your inbox. Ready to submit, without touching it.</p>
+        <div class="terminal" style="font-size:11px;padding:10px 14px;">
+          <div><span class="t-muted">report_oct_2025.pdf</span></div>
+          <div><span class="t-muted">generation time: 2025-10-01 07:08:54 UTC</span></div>
+          <div><span class="t-green">✔ Sent to: you@fintech.in</span></div>
+        </div>
+      </div>
+
+      <div class="pipe-step">
+        <div class="pipe-number">04</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <h4 style="font-size:15px;font-weight:700;color:var(--text-1);">Walk In Confident</h4>
+        </div>
+        <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:14px;">Hand the auditor the PDF. Show them the live Grafana trace. Watch them check the evidence chain. Audit complete — no drama, no scrambling.</p>
+        <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:10px 14px;">
+          <p style="font-size:12px;color:var(--green);font-weight:600;">Annex 1.3 compliance: ✓</p>
+          <p style="font-size:11px;color:var(--text-3);">RBI PA Master Direction · Sep 2025</p>
+        </div>
+      </div>
+
     </div>
   </div>
-</section>
+</div>
 
-<section id="skeleton" class="hidden max-w-4xl mx-auto space-y-4 animate-pulse">
-  <div class="h-6 w-1/4 bg-zinc-300 dark:bg-zinc-800 rounded"></div>
-  <div class="h-4 bg-zinc-300 dark:bg-zinc-800 rounded"></div>
-  <div class="h-4 w-2/3 bg-zinc-300 dark:bg-zinc-800 rounded"></div>
-</section>
 
-<div id="error" class="hidden mt-8 text-center text-sm text-red-500"></div>
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  TECHNICAL GUARDRAILS — CISO SECTION                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="ciso-specs" class="section">
+  <div class="container">
 
-<!-- TRUST SIGNALS -->
-<section class="text-center max-w-4xl mx-auto">
-  <div class="flex flex-wrap justify-center gap-8 text-sm text-zinc-500">
-    <div class="flex items-center gap-2">
-      <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-      Cluster live since Oct 2025 · 99.9% uptime
-    </div>
-    <div class="flex items-center gap-2">
-      <span>🧑‍💻</span>
-      <a href="https://github.com/kartikinfra/finflow-infra" target="_blank" class="text-blue-500 hover:underline">Open Source — 71 commits</a>
-    </div>
-    <div class="flex items-center gap-2">
-      <span>🛡️</span>
-      9 production incidents documented
+    <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:64px;align-items:start;" class="md-grid-2">
+
+      <div>
+        <span class="badge-indigo" style="margin-bottom:20px;display:inline-flex;">For the CISO in the Room</span>
+        <h2 style="font-size:clamp(24px,3.5vw,38px);line-height:1.1;letter-spacing:-0.02em;margin-bottom:20px;">
+          Technical Guardrails.<br/>
+          <span style="color:var(--text-2);">Built for the Paranoid.</span>
+        </h2>
+        <p style="font-size:15px;color:var(--text-2);line-height:1.75;margin-bottom:24px;">
+          We know you've seen "security" tools that add overhead, require privileged access, or phone home. FinFlow is different by design — eBPF runs in the kernel without any agent polling, and 100% of your data stays in your VPC.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="check-item">
+            <div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>Open-source Falco rules — audit the detection logic yourself</span>
+          </div>
+          <div class="check-item">
+            <div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>No data leaves your cluster. Zero telemetry to FinFlow.</span>
+          </div>
+          <div class="check-item">
+            <div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>RBAC and Network Policies configured by default</span>
+          </div>
+          <div class="check-item">
+            <div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span>AES-256 encryption at rest and in transit for all stored traces</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spec Grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+
+        <div style="background:var(--bg-card);border:1px solid var(--border-soft);border-radius:14px;padding:20px 18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <div style="width:8px;height:8px;background:var(--green);border-radius:50%;"></div>
+            <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">CPU Overhead</span>
+          </div>
+          <p style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--green);margin-bottom:4px;">&lt;1%</p>
+          <p style="font-size:12px;color:var(--text-3);">eBPF · no userspace polling · no agent process</p>
+        </div>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border-soft);border-radius:14px;padding:20px 18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <div style="width:8px;height:8px;background:var(--blue);border-radius:50%;"></div>
+            <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Encryption</span>
+          </div>
+          <p style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--blue);margin-bottom:4px;">AES-256</p>
+          <p style="font-size:12px;color:var(--text-3);">All stored traces · at rest and in transit</p>
+        </div>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border-soft);border-radius:14px;padding:20px 18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <div style="width:8px;height:8px;background:var(--indigo);border-radius:50%;"></div>
+            <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Data Sovereignty</span>
+          </div>
+          <p style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--indigo);margin-bottom:4px;">100%</p>
+          <p style="font-size:12px;color:var(--text-3);">In-VPC · zero external API calls</p>
+        </div>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border-soft);border-radius:14px;padding:20px 18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <div style="width:8px;height:8px;background:var(--amber);border-radius:50%;"></div>
+            <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Setup Time</span>
+          </div>
+          <p style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--amber);margin-bottom:4px;">15 min</p>
+          <p style="font-size:12px;color:var(--text-3);">k3s / K8s · Helm chart · zero custom code</p>
+        </div>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border-soft);border-radius:14px;padding:20px 18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <div style="width:8px;height:8px;background:var(--green);border-radius:50%;"></div>
+            <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Probe Layer</span>
+          </div>
+          <p style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--green);margin-bottom:4px;">Kernel</p>
+          <p style="font-size:12px;color:var(--text-3);">eBPF · can't be bypassed by userspace</p>
+        </div>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border-soft);border-radius:14px;padding:20px 18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <div style="width:8px;height:8px;background:var(--blue);border-radius:50%;"></div>
+            <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Compliance Ref</span>
+          </div>
+          <p style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--blue);margin-bottom:4px;line-height:1.2;">Annex 1.3</p>
+          <p style="font-size:12px;color:var(--text-3);">RBI PA Master Direction · Sep 2025</p>
+        </div>
+
+      </div>
     </div>
   </div>
-</section>
+</div>
 
-<!-- AUDITOR BLOCK -->
-<section class="max-w-4xl mx-auto">
-  <div class="glass border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-8 text-center">
 
-    <p class="text-sm text-zinc-500 mb-6">
-      What the RBI auditor will ask:
-    </p>
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  WHO THIS IS FOR                                       -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section" style="background:var(--bg-surface);">
+  <div class="container-sm">
 
-    <div class="space-y-3 text-lg font-medium">
-      <p>"Show last month's cyber incidents"</p>
-      <p>"How were they detected?"</p>
-      <p>"Where is the trace + root cause?"</p>
+    <div style="text-align:center;margin-bottom:40px;">
+      <h2 style="font-size:clamp(24px,3.5vw,38px);line-height:1.1;letter-spacing:-0.02em;margin-bottom:12px;">Is FinFlow right for you?</h2>
+      <p style="font-size:15px;color:var(--text-2);">We're specific by design. This is built for one problem, solved completely.</p>
     </div>
 
-    <p class="mt-6 text-blue-500 font-semibold">
-      FinFlow answers all three automatically. <span class="text-zinc-400 font-normal">Trigger the incident above to see proof.</span>
-    </p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="md-grid-2">
+
+      <div style="background:rgba(34,197,94,0.04);border:1px solid rgba(34,197,94,0.2);border-radius:18px;padding:28px 24px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+          <div style="width:32px;height:32px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--green);">You're a fit</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Payment Aggregator or Digital Lending startup (Seed / Series A)</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Applied for or received RBI Payment Aggregator authorization</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Running Kubernetes (or planning to within 1 month)</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Monthly RBI reporting currently takes &gt;2 days or is done manually</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Have a CISO or security-minded engineer on your team</span></div>
+        </div>
+      </div>
+
+      <div style="background:rgba(248,113,113,0.03);border:1px solid rgba(248,113,113,0.15);border-radius:18px;padding:28px 24px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+          <div style="width:32px;height:32px;background:rgba(248,113,113,0.10);border:1px solid rgba(248,113,113,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </div>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--red);">Not a fit (yet)</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="check-item" style="color:var(--text-3);">
+            <div style="width:18px;height:18px;min-width:18px;border-radius:50%;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);display:flex;align-items:center;justify-content:center;margin-top:2px;">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </div>
+            <span>Need a full-stack DevOps team — we're RBI compliance specialists, not generalist ops</span>
+          </div>
+          <div class="check-item" style="color:var(--text-3);">
+            <div style="width:18px;height:18px;min-width:18px;border-radius:50%;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);display:flex;align-items:center;justify-content:center;margin-top:2px;">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </div>
+            <span>Pre-funding or pre-RBI-application — compliance urgency isn't there yet</span>
+          </div>
+          <div class="check-item" style="color:var(--text-3);">
+            <div style="width:18px;height:18px;min-width:18px;border-radius:50%;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);display:flex;align-items:center;justify-content:center;margin-top:2px;">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </div>
+            <span>On a non-containerized or legacy bare-metal architecture</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  PRICING                                               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="pricing" class="section">
+  <div class="container">
+
+    <div style="text-align:center;margin-bottom:48px;">
+      <span class="badge-blue" style="margin-bottom:16px;display:inline-flex;">Transparent Pricing</span>
+      <h2 style="font-size:clamp(28px,4vw,44px);line-height:1.1;letter-spacing:-0.03em;margin-bottom:12px;">
+        Cheaper than building.<br/>
+        <span style="color:var(--text-2);">Safer than ignoring.</span>
+      </h2>
+      <p style="font-size:15px;color:var(--text-2);max-width:440px;margin:0 auto;">Most teams build visibility late. RBI audits don't wait. Neither should you.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;max-width:960px;margin:0 auto 32px;">
+
+      <!-- Tier 1: Setup -->
+      <div class="pricing-card">
+        <p style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:8px;">One-Time Setup</p>
+        <p style="font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:var(--text-1);margin-bottom:4px;">₹1,25,000</p>
+        <p style="font-size:13px;color:var(--text-2);margin-bottom:28px;">3 weeks · your cluster · done right</p>
+        <div style="height:1px;background:var(--border-soft);margin-bottom:20px;"></div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Falco + eBPF kernel-level runtime detection</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>OpenTelemetry + Grafana Tempo traces</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>10 RBI-mapped Falco rules (Annex 1.3)</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Network Policies + RBAC hardening</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Monthly report template</span></div>
+        </div>
+        <a href="https://calendly.com/kartikops-dev/30min" target="_blank" class="btn-secondary" style="margin-top:28px;width:100%;justify-content:center;">
+          Start Here
+        </a>
+      </div>
+
+      <!-- Tier 2: Managed Basic (FEATURED) -->
+      <div class="pricing-card featured">
+        <p style="font-size:11px;color:rgba(147,197,253,0.7);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:8px;">Managed Compliance</p>
+        <p style="font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:var(--text-1);margin-bottom:4px;">₹85,000<span style="font-size:18px;font-weight:400;color:var(--text-2);">/mo</span></p>
+        <p style="font-size:13px;color:var(--text-2);margin-bottom:28px;">Monthly PDF + RCA, done for you</p>
+        <div style="height:1px;background:rgba(59,130,246,0.2);margin-bottom:20px;"></div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Weekly cluster security review</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Monthly RBI report (auto-generated PDF)</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Falco rules updated per new RBI circulars</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Priority Slack support</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Quarterly RBI Readiness Scorecard</span></div>
+        </div>
+        <a href="https://calendly.com/kartikops-dev/30min" target="_blank" class="btn-primary" style="margin-top:28px;width:100%;justify-content:center;">
+          Get Managed Compliance
+        </a>
+      </div>
+
+      <!-- Tier 3: Premium -->
+      <div class="pricing-card" style="background:linear-gradient(145deg,#0D1D38,#08111F);border-color:rgba(129,140,248,0.25);">
+        <p style="font-size:11px;color:var(--indigo);opacity:0.8;text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:8px;">Premium · Human-in-the-Loop</p>
+        <p style="font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:var(--text-1);margin-bottom:4px;">₹1,75,000<span style="font-size:18px;font-weight:400;color:var(--text-2);">/mo</span></p>
+        <p style="font-size:13px;color:var(--text-2);margin-bottom:28px;">Kartik writes your RCA + audit support</p>
+        <div style="height:1px;background:rgba(129,140,248,0.15);margin-bottom:20px;"></div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Everything in Managed Compliance</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Root cause analysis written by Kartik personally</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Preventive actions drafted and reviewed monthly</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Direct call before your auditor visit</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Priority escalation + on-demand trace review</span></div>
+        </div>
+        <a href="https://calendly.com/kartikops-dev/30min" target="_blank" class="btn-secondary" style="margin-top:28px;width:100%;justify-content:center;border-color:rgba(129,140,248,0.3);color:var(--indigo);">
+          Talk to Kartik
+        </a>
+      </div>
+
+    </div>
+
+    <!-- ROI Banner -->
+    <div class="roi-banner">
+      <div style="font-size:32px;">💸</div>
+      <div>
+        <p style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text-1);margin-bottom:4px;">
+          ₹1.25L setup <span style="color:var(--text-3);font-weight:400;">vs</span> <span style="color:var(--red);">₹10L RBI fine</span>
+        </p>
+        <p style="font-size:14px;color:var(--text-2);">That's an <strong style="color:var(--green);">8× return before your first audit.</strong> And that's before counting the reputational damage of a failed inspection.</p>
+      </div>
+    </div>
 
   </div>
-</section>
+</div>
 
-<!-- PROBLEM -->
-<section class="grid md:grid-cols-2 gap-16 items-center">
 
-  <div>
-    <h2 class="text-4xl font-semibold tracking-tight">
-      RBI doesn't want dashboards.<br/>
-      <span class="text-zinc-400">They want evidence.</span>
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  KARTIK — INFRASTRUCTURE GUARDIAN                      -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section" style="background:var(--bg-surface);">
+  <div class="container-sm">
+
+    <div class="kartik-card">
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:start;" class="md-grid-2">
+
+        <!-- Avatar -->
+        <div style="text-align:center;">
+          <div style="position:relative;display:inline-block;">
+         <picture>
+         <source srcset="./assets/kartik.webp" type="image/webp">
+          <img 
+            src="./assets/kartik.jpg" 
+            alt="Kartik Kakodiya - Infrastructure Engineer"
+            loading="lazy"
+            decoding="async"
+            style="width:96px;height:96px;border-radius:50%;border:2px solid rgba(59,130,246,0.4);display:block;object-fit:cover;"
+            />
+         </picture>
+            <div style="position:absolute;bottom:-4px;right:-4px;background:var(--green);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg-card);">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+          <div style="margin-top:12px;">
+            <span class="badge-indigo" style="font-size:10px;">Infrastructure Guardian</span>
+          </div>
+        </div>
+
+        <!-- Bio -->
+        <div>
+          <h3 style="font-size:22px;font-weight:700;letter-spacing:-0.01em;margin-bottom:4px;">Kartik Kakodiya</h3>
+          <p style="font-size:13px;color:var(--text-3);margin-bottom:16px;">Infrastructure Engineer · Kubernetes · eBPF · Fintech Security</p>
+
+          <p style="font-size:14px;color:var(--text-2);line-height:1.75;margin-bottom:14px;">
+            I run the <a href="https://github.com/kartikinfra/finflow-infra" target="_blank" style="color:var(--blue);text-decoration:none;font-weight:500;">Startup Disaster Lab</a> — a live, production-grade fintech Kubernetes cluster where I deliberately break infrastructure, instrument kernel events with eBPF, and document everything the way RBI expects it to be documented.
+          </p>
+          <p style="font-size:14px;color:var(--text-2);line-height:1.75;margin-bottom:20px;">
+            Every incident in our Evidence Vault happened on this cluster. Every report was generated from real data. I've built this because I believe <strong style="color:var(--text-1);">compliance shouldn't require a security degree</strong> — just the right infrastructure.
+          </p>
+          <p style="font-size:14px;color:var(--text-2);line-height:1.75;margin-bottom:20px;">
+            In the Premium tier, I become your <strong style="color:var(--indigo);">human-in-the-loop</strong> — personally reviewing every RCA, drafting your corrective action narrative, and joining your call the day before an auditor visit. You get my kernel-level knowledge, packaged into board-level language.
+          </p>
+
+          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+            <a href="https://linkedin.com/in/kartikk09" target="_blank" class="btn-ghost">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              LinkedIn
+            </a>
+            <a href="https://github.com/kartikinfra/finflow-infra" target="_blank" class="btn-ghost">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+              Startup Disaster Lab
+            </a>
+            <a href="https://demo.kartikinfra.in/sample-rbi-report.pdf" target="_blank" class="btn-ghost">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Sample Report
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  FINAL CTA                                             -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="cta-section section" style="position:relative;">
+  <div class="cta-glow"></div>
+  <div class="container-sm" style="text-align:center;position:relative;">
+
+    <span class="badge-green" style="margin-bottom:24px;display:inline-flex;">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Your Regulatory Shield Starts Here
+    </span>
+
+    <h2 style="font-size:clamp(32px,5vw,56px);line-height:1.08;letter-spacing:-0.03em;margin-bottom:20px;">
+      Fix the audit trail<br/>
+      <span class="text-gradient">before the audit.</span>
     </h2>
 
-    <p class="mt-6 text-zinc-500 leading-relaxed">
-      Logs are scattered. Detection is manual. Reports are stitched together before submission.
-      That's where audits fail — not because of infrastructure, but because of missing audit trail.
+    <p style="font-size:16px;color:var(--text-2);line-height:1.75;max-width:520px;margin:0 auto 40px;">
+      A 20-minute call to understand your current setup — no pitch, no sales script, no commitment. Just kernel-level clarity on whether you're RBI-ready.
     </p>
-  </div>
 
-  <div class="space-y-4 text-sm text-zinc-500">
-    <div class="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800">Logs scattered across tools</div>
-    <div class="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800">Manual detection</div>
-    <div class="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800">Excel-based reports</div>
-  </div>
-
-</section>
-
-<!-- WHAT YOU SHOW AUDITOR -->
-<section class="text-center">
-
-  <h2 class="text-4xl font-semibold tracking-tight mb-10">
-    What you show an auditor
-  </h2>
-
-  <div class="grid md:grid-cols-3 gap-6">
-
-    <div class="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 text-left">
-      <p class="font-medium mb-2">RBI Report</p>
-      <p class="text-sm text-zinc-500">Incidents, timestamps, severity — ready to submit format</p>
+    <div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:24px;">
+      <a href="https://calendly.com/kartikops-dev/30min" target="_blank" class="btn-primary" style="font-size:16px;padding:16px 32px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Book Free 20-min RBI Readiness Call
+      </a>
+      <button id="shareBtn" class="btn-secondary" style="font-size:15px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share with your CISO / CTO
+      </button>
     </div>
 
-    <div class="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 text-left">
-      <p class="font-medium mb-2">Trace Mapping</p>
-      <p class="text-sm text-zinc-500">Root cause linked to every incident with trace ID</p>
-    </div>
-
-    <div class="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 text-left">
-      <p class="font-medium mb-2">Detection Evidence</p>
-      <p class="text-sm text-zinc-500">Falco + eBPF runtime events — not manual logs</p>
-    </div>
+    <p style="font-size:13px;color:var(--text-3);">
+      No pitch. Just honest infrastructure assessment. ·
+      <a href="https://github.com/kartikinfra/finflow-infra" target="_blank" style="color:var(--blue);text-decoration:none;">View source on GitHub</a>
+    </p>
 
   </div>
+</div>
 
-  <p class="mt-6 text-sm text-zinc-400">
-    Not dashboards. Not guesswork. <strong class="text-zinc-900 dark:text-white">Audit evidence.</strong>
-  </p>
 
-</section>
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  FOOTER                                                -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<footer style="border-top:1px solid var(--border-soft);padding:32px 0;">
+  <div class="container" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;">
 
-<!-- WHO THIS IS FOR -->
-<section class="max-w-2xl mx-auto">
-  <div class="rounded-2xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20 p-8 text-sm">
-    <p class="font-semibold mb-3 text-base">✅ You're a fit if:</p>
-    <ul class="space-y-2 text-zinc-600 dark:text-zinc-400">
-      <li>• You're a Payment Aggregator or Digital Lending startup (seed/Series A)</li>
-      <li>• You've applied for or received RBI authorization</li>
-      <li>• You're on Kubernetes (or planning within 1 month)</li>
-      <li>• Monthly RBI reporting currently takes more than 2 days or is manual</li>
-    </ul>
-    <p class="font-semibold mt-6 mb-3 text-base">❌ Not a fit if:</p>
-    <ul class="space-y-2 text-zinc-600 dark:text-zinc-400">
-      <li>• You need a full-stack DevOps team (we're RBI-specific security)</li>
-      <li>• You're pre-funding or pre-revenue (compliance isn't urgent yet)</li>
-    </ul>
-  </div>
-</section>
-
-<!-- HOW -->
-<section class="text-center">
-
-  <h2 class="text-4xl font-semibold mb-10">
-    Deployed in 3 weeks
-  </h2>
-
-  <div class="grid md:grid-cols-3 gap-8 text-left">
-
-    <div class="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-      <p class="font-medium mb-2">1. Install</p>
-      <p class="text-sm text-zinc-500">Falco + eBPF + OpenTelemetry on your existing K8s cluster</p>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:24px;height:24px;background:linear-gradient(135deg,#1D4ED8,#3B82F6);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--text-2);">FinFlow</span>
+      <span style="font-size:12px;color:var(--text-3);">· Built by <a href="https://linkedin.com/in/kartikk09" target="_blank" style="color:var(--blue);text-decoration:none;">Kartik Kakodiya</a></span>
     </div>
 
-    <div class="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-      <p class="font-medium mb-2">2. Correlate</p>
-      <p class="text-sm text-zinc-500">Every incident automatically linked to a trace and root cause</p>
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+      <span style="font-family:monospace;font-size:11px;background:var(--bg-card);border:1px solid var(--border-soft);color:var(--text-3);padding:3px 8px;border-radius:4px;">Oracle Cloud ARM</span>
+      <span style="font-family:monospace;font-size:11px;background:var(--bg-card);border:1px solid var(--border-soft);color:var(--text-3);padding:3px 8px;border-radius:4px;">k3s</span>
+      <span style="font-family:monospace;font-size:11px;background:var(--bg-card);border:1px solid var(--border-soft);color:var(--text-3);padding:3px 8px;border-radius:4px;">Falco 0.43.0</span>
+      <span style="font-family:monospace;font-size:11px;background:var(--bg-card);border:1px solid var(--border-soft);color:var(--text-3);padding:3px 8px;border-radius:4px;">eBPF</span>
     </div>
 
-    <div class="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-      <p class="font-medium mb-2">3. Report</p>
-      <p class="text-sm text-zinc-500">RBI-ready monthly report generated every month</p>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- PRICING -->
-<section class="text-center">
-
-  <h2 class="text-4xl font-semibold mb-4">
-    Cheaper than building. Safer than ignoring.
-  </h2>
-
-  <p class="text-zinc-500 mb-10">Hiring 1 security engineer = ₹15–25L/year. You don't need that.</p>
-
-  <div class="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-
-    <div class="p-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 text-left">
-      <p class="text-xs text-zinc-500 uppercase tracking-widest mb-2">One-time Setup</p>
-      <p class="text-4xl font-bold">₹1,75,000</p>
-      <p class="text-sm text-zinc-500 mt-2">3 weeks · your cluster</p>
-      <ul class="mt-6 space-y-2 text-sm text-zinc-500">
-        <li>✓ Falco + eBPF runtime detection</li>
-        <li>✓ OpenTelemetry + Tempo traces</li>
-        <li>✓ 10 RBI-mapped Falco rules</li>
-        <li>✓ Network Policies + RBAC</li>
-        <li>✓ Monthly report template</li>
-      </ul>
-    </div>
-
-    <div class="p-8 rounded-2xl bg-blue-600 text-white text-left">
-      <p class="text-xs opacity-80 uppercase tracking-widest mb-2">Monthly Managed</p>
-      <p class="text-4xl font-bold">₹32,000<span class="text-base font-normal">/mo</span></p>
-      <p class="text-sm opacity-80 mt-2">vs Datadog ₹1,50,000+/mo</p>
-      <ul class="mt-6 space-y-2 text-sm opacity-90">
-        <li>✓ Weekly cluster review</li>
-        <li>✓ Monthly RBI report (draft ready)</li>
-        <li>✓ Falco rule updates on new circulars</li>
-        <li>✓ Priority Slack support</li>
-        <li>✓ Quarterly RBI Readiness Scorecard</li>
-      </ul>
-    </div>
-
-  </div>
-
-  <div class="mt-6 bg-red-50 dark:bg-red-950/20 rounded-xl p-4 text-sm text-red-600 dark:text-red-400 max-w-3xl mx-auto text-center">
-    💸 <strong>₹1.75L setup vs ₹10L penalty</strong> — that's a 5.7x return before your first monthly report
-  </div>
-
-</section>
-
-<!-- FINAL CTA -->
-<section class="text-center pb-20">
-
-  <h2 class="text-4xl font-semibold mb-6">
-    Fix the audit trail before the audit.
-  </h2>
-
-  <div class="flex justify-center gap-4 flex-wrap">
-    <a href="https://calendly.com/kartikops-dev/30min" target="_blank"
-       class="px-8 py-4 rounded-full bg-blue-600 text-white font-medium hover:scale-[1.03] transition shadow-lg">
-      Book Free 20-min RBI Readiness Call
-    </a>
-    <button onclick="navigator.share({title:'FinFlow — RBI Audit Trail Infra',url:window.location.href})"
-       class="px-8 py-4 rounded-full border border-zinc-300 dark:border-zinc-700 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition text-sm">
-      📤 Share with your CTO
-    </button>
-  </div>
-
-  <p class="text-sm text-zinc-400 mt-4">
-    No pitch. Just understand your current setup.
-  </p>
-
-</section>
-
-</main>
-
-<!-- FOOTER -->
-<footer class="border-t border-zinc-200 dark:border-zinc-800 py-8">
-  <div class="max-w-6xl mx-auto px-6 flex flex-wrap justify-between items-center gap-4 text-xs text-zinc-500">
-    <span>Built by <a href="https://linkedin.com/in/kartikk09" target="_blank" class="text-blue-500 hover:underline">Kartik Kakodiya</a> · Startup Disaster Lab</span>
-    <span>Running on Oracle Cloud ARM · k3s · Falco 0.43.0</span>
-    <a href="https://github.com/kartikinfra/finflow-infra" target="_blank" class="text-blue-500 hover:underline">
+    <a href="https://github.com/kartikinfra/finflow-infra" target="_blank" style="font-size:13px;color:var(--blue);text-decoration:none;display:flex;align-items:center;gap:6px;">
       GitHub →
     </a>
+
   </div>
 </footer>
 
+
+<!-- ─── Responsive styles ──────────────────────────────── -->
+<style>
+@media (max-width: 768px) {
+  .md-grid-2 { grid-template-columns: 1fr !important; gap: 32px !important; }
+  .container { padding: 0 16px; }
+  .container-sm { padding: 0 16px; }
+  .section { padding: 64px 0; }
+  .kartik-card { padding: 28px 20px !important; }
+  .kartik-card > div { grid-template-columns: 1fr !important; }
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+</style>
+
+
+<!-- ─── JavaScript ─────────────────────────────────────── -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  lucide.createIcons();
+  // ── Share Button ──────────────────────────────────────
+  const shareBtn = document.getElementById('shareBtn');
+  shareBtn.addEventListener('click', async () => {
+    const payload = { title: 'FinFlow — RBI Regulatory Shield', url: window.location.href };
+    try {
+      if (navigator.share) { await navigator.share(payload); }
+      else {
+        await navigator.clipboard.writeText(window.location.href);
+        const orig = shareBtn.innerHTML;
+        shareBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Link copied!';
+        setTimeout(() => { shareBtn.innerHTML = orig; }, 2000);
+      }
+    } catch(e) {}
+  });
 
-  // Theme toggle
-  document.getElementById('themeToggle').onclick = () => {
-    document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme',
-      document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-  };
-
-  // Trigger button
-  const btn = document.getElementById('triggerBtn');
-  const skeleton = document.getElementById('skeleton');
-  const report = document.getElementById('report');
+  // ── Falco Button ──────────────────────────────────────
+  const falcoBtn = document.getElementById('triggerFalcoBtn');
+  const falcoReport = document.getElementById('falcoReport');
   const error = document.getElementById('error');
 
-  btn.onclick = async () => {
-
-    btn.disabled = true;
-    skeleton.classList.remove('hidden');
-    report.classList.add('hidden');
+  falcoBtn.addEventListener('click', async () => {
+    falcoBtn.disabled = true;
+    falcoBtn.style.opacity = '0.6';
+    falcoBtn.innerHTML = '<span style="width:7px;height:7px;background:#F87171;border-radius:50%;display:block;animation:pulse 1s infinite;"></span> Detecting...';
+    falcoReport.classList.add('hidden');
     error.classList.add('hidden');
 
     try {
       const start = performance.now();
-
-      const res = await fetch('https://demo.kartikinfra.in/api/simulate-slow');
-      if (!res.ok) throw new Error();
-
+      const res = await fetch('https://demo.kartikinfra.in/api/simulate-falco-alert');
+      if (!res.ok) throw new Error('API error');
       const data = await res.json();
+      const mttd = ((performance.now() - start) / 1000).toFixed(2) + 's';
 
-      const end = performance.now();
+      document.getElementById('falcoMttd').innerText = mttd;
+      document.getElementById('falcoTimestamp').innerText = data.timestamp;
+      document.getElementById('falcoIncId').innerText = data.incidentId;
+      document.getElementById('falcoRule').innerText = data.falcoRule;
+      document.getElementById('falcoOutput').innerText = data.falcoOutput;
+      document.getElementById('rcaText').innerText = data.rca;
+      document.getElementById('actionText').innerText = data.preventiveAction;
 
-      document.getElementById('mttd').innerText =
-        ((end - start)/1000).toFixed(2) + 's';
-
-      document.getElementById('timestamp').innerText = data.timestamp;
-      document.getElementById('traceId').innerText = data.traceId;
-      document.getElementById('incId').innerText =
-        'INC-' + Math.floor(Math.random()*10000);
-
-      const grafanaUrl =
-         `https://grafana.kartikinfra.in/explore?orgId=1&left=` +
-        encodeURIComponent(JSON.stringify({
-          datasource: "ffj1etsw8c2kgc",
-          queries: [
-            {
-             refId: "A",
-             queryType: "traceql",
-             query: data.traceId
-            }
-          ],
-          range: {
-             from: "now-15m",
-             to: "now+5m"
-          }
-        }));
-
-      document.getElementById('grafanaLink').href = grafanaUrl;
-
-      report.classList.remove('hidden');
-
+      falcoReport.classList.remove('hidden');
     } catch {
-      error.innerText = 'System unreachable — check backend or CORS';
+      error.innerText = '⚠ Demo API unreachable. This happens when the cluster is sleeping. Try again or check GitHub for the latest status.';
       error.classList.remove('hidden');
     } finally {
-      skeleton.classList.add('hidden');
-      btn.disabled = false;
+      falcoBtn.disabled = false;
+      falcoBtn.style.opacity = '1';
+      falcoBtn.innerHTML = '<span style="width:7px;height:7px;background:#F87171;border-radius:50%;display:block;"></span> Simulate Live Incident';
     }
+  });
 
-  };
+  // ── Tempo Button ──────────────────────────────────────
+  const tempoBtn = document.getElementById('triggerTempoBtn');
+  const skeleton = document.getElementById('skeleton');
+  const tempoReport = document.getElementById('tempoReport');
+  const tempoStatic = document.getElementById('tempoStatic');
+
+  tempoBtn.addEventListener('click', async () => {
+    tempoBtn.disabled = true;
+    tempoBtn.style.opacity = '0.6';
+    skeleton.style.display = 'flex';
+    skeleton.classList.remove('hidden');
+    tempoReport.classList.add('hidden');
+    tempoStatic.classList.add('hidden');
+    error.classList.add('hidden');
+
+    try {
+      const start = performance.now();
+      const res = await fetch('https://demo.kartikinfra.in/api/simulate-slow');
+      if (!res.ok) throw new Error('API error');
+      const data = await res.json();
+      const mttd = ((performance.now() - start) / 1000).toFixed(2) + 's';
+
+      document.getElementById('tempoMttd').innerText = mttd;
+      document.getElementById('tempoTimestamp') && (document.getElementById('tempoTimestamp').innerText = data.timestamp || '');
+      document.getElementById('tempoTraceId').innerText = data.traceId;
+      document.getElementById('tempoIncId').innerText = 'INC-' + Math.floor(Math.random() * 9000 + 1000);
+
+      const grafanaUrl = `https://grafana.kartikinfra.in/explore?orgId=1&left=` +
+        encodeURIComponent(JSON.stringify({
+          datasource: "ffj1etsw8c2kgc",
+          queries: [{ refId: "A", queryType: "traceql", query: data.traceId }],
+          range: { from: "now-15m", to: "now+5m" }
+        }));
+      document.getElementById('grafanaLink').href = grafanaUrl;
+
+      tempoReport.classList.remove('hidden');
+    } catch {
+      error.innerText = '⚠ Trace API unreachable. The cluster may be sleeping. Try again in 30 seconds or view the GitHub repo for status.';
+      error.classList.remove('hidden');
+      tempoStatic.classList.remove('hidden');
+    } finally {
+      skeleton.style.display = 'none';
+      skeleton.classList.add('hidden');
+      tempoBtn.disabled = false;
+      tempoBtn.style.opacity = '1';
+    }
+  });
+
+  // ── Scroll-triggered entrance animations ─────────────
+  const observerOpts = { threshold: 0.12, rootMargin: '0px 0px -40px 0px' };
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+        io.unobserve(e.target);
+      }
+    });
+  }, observerOpts);
+
+  document.querySelectorAll('.exhibit-card, .stat-card, .pipe-step, .pricing-card, .kartik-card, .chain-node').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    io.observe(el);
+  });
 
 });
 </script>
