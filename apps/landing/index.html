@@ -379,7 +379,15 @@ nav a:hover { color: var(--text-1) !important; }
 }
 </style>
 </head>
+ <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-F2VDKECBCT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
+  gtag('config', 'G-F2VDKECBCT');
+</script>
 <body>
 
 <!-- ═══════════════════════════════════════════════════════ -->
@@ -1399,7 +1407,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const start = performance.now();
-      const res = await fetch('https://demo.kartikinfra.in/api/simulate-falco-alert');
+      const res = await fetch('https://alerts.kartikinfra.in/api/simulate-falco-alert');
       if (!res.ok) throw new Error('API error');
       const data = await res.json();
       const mttd = ((performance.now() - start) / 1000).toFixed(2) + 's';
