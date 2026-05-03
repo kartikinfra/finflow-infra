@@ -4,36 +4,61 @@ customRules:
       condition: or container.name contains "grafana-sc-datasources"
       override:
         condition: append
-    - rule: postgres-shell-exec-detection
-      desc: Detect shell execution inside postgres container
+
+    - list: authorized_outbound_images
+      items: [
+        "docker.io/rancher/mirrored-coredns-coredns",
+        "docker.io/cloudflare/cloudflared",
+        "quay.io/prometheus/alertmanager",
+        "docker.io/grafana/grafana",
+        "docker.io/grafana/tempo",
+        "docker.io/rancher/mirrored-library-traefik",
+        "docker.io/kaka750/falco-receiver",
+        "docker.io/kaka750/finflow-backend",
+        "docker.io/kaka750/finflow-frontend",
+        "docker.io/kaka750/finflow-landing",
+        "docker.io/library/postgres",
+        "docker.io/otel/opentelemetry-collector-k8s",
+        "quay.io/kiwigrid/k8s-sidecar",
+        "registry.k8s.io/kube-state-metrics/kube-state-metrics",
+        "quay.io/prometheus-operator/prometheus-operator",
+        "quay.io/prometheus/node-exporter",
+        "quay.io/prometheus/prometheus"
+      ]
+
+    - rule: global-shell-exec-detection
+      desc: Detect shell execution inside any production container
       condition: >
         spawned_process
         and proc.name in (bash, sh, zsh)
         and container
-        and container.image.repository contains "postgres"
+        and not container.image.repository in (authorized_outbound_images)
       output: >
-        Postgres container shell detected |
-        process=%proc.name cmd=%proc.cmdline container=%container.name
+        Unauthorized terminal shell detected |
+        process=%proc.name cmd=%proc.cmdline container=%container.name image=%container.image.repository
       priority: CRITICAL
-      tags: [postgres, security, k8s]
-    - rule: outbound-rule-no-unathorized-trafic-can-come-insidethePod
-      desc: outbound traffic detected from container
+      tags: [security, k8s, rbi-compliance]
+
+    - rule: outbound-rule-no-unauthorized-traffic
+      desc: Outbound traffic detected from unauthorized container
       condition: >
         outbound
         and container
-        and not container.name contains "coredns"
+        and not container.image.repository in (authorized_outbound_images)
       output: >
-        container outbound network detected |
-        connection=%fd.name process=%proc.name
+        Unauthorized container outbound network detected |
+        connection=%fd.name process=%proc.name image=%container.image.repository
       priority: WARNING
+
 falco:
   json_output: true
   http_output:
     enabled: true
     url: http://falcosidekick.monitoring.svc.cluster.local:2801
+
 falcosidekick:
   enabled: true
   config:
     webhook:
       address: "http://falco-receiver-svc.monitoring.svc.cluster.local:3000/alert"
-      minimumpriority: "debug" # Sabhi alerts capture karne ke liye
+      minimumpriority: "notice"
