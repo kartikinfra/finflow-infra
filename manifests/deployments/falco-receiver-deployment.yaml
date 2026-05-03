@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: falco-receiver
-          image: kaka750/falco-receiver:v6-arm
+          image: kaka750/falco-receiver:v10-arm
           ports:
             - containerPort: 3000
           env:
@@ -25,6 +25,10 @@ spec:
              value: "RBI-PA-2024-XXXX"
            - name: CLIENT_DOMAIN
              value: "xyzpayments.in"
+           - name: CISO_NAME           # ← NEW
+             value: "Rajesh Kumar"
+           - name: CISO_DESIGNATION    # ← NEW
+             value: "Chief Information Security Officer"
           volumeMounts:
             - name: data
               mountPath: /data
