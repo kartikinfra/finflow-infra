@@ -1,7 +1,7 @@
 customRules:
   falco_rules.local.yaml: |-
     - macro: user_known_contact_k8s_api_server_activities
-      condition: or container.name contains "grafana-sc-datasources"
+      condition: or container.name contains "grafana-sc-"
       override:
         condition: append
 
@@ -13,11 +13,6 @@ customRules:
         "docker.io/grafana/grafana",
         "docker.io/grafana/tempo",
         "docker.io/rancher/mirrored-library-traefik",
-        "docker.io/kaka750/falco-receiver",
-        "docker.io/kaka750/finflow-backend",
-        "docker.io/kaka750/finflow-frontend",
-        "docker.io/kaka750/finflow-landing",
-        "docker.io/library/postgres",
         "docker.io/otel/opentelemetry-collector-k8s",
         "quay.io/kiwigrid/k8s-sidecar",
         "registry.k8s.io/kube-state-metrics/kube-state-metrics",
@@ -26,13 +21,18 @@ customRules:
         "quay.io/prometheus/prometheus"
       ]
 
+    - list: authorized_shell_images
+      items: [
+        "docker.io/kaka750/falco-receiver"
+      ]
+
     - rule: global-shell-exec-detection
       desc: Detect shell execution inside any production container
       condition: >
         spawned_process
-        and proc.name in (bash, sh, zsh)
+        and proc.name in (bash, sh, zsh, busybox)
         and container
-        and not container.image.repository in (authorized_outbound_images)
+        and not container.image.repository in (authorized_shell_images)
       output: >
         Unauthorized terminal shell detected |
         process=%proc.name cmd=%proc.cmdline container=%container.name image=%container.image.repository
