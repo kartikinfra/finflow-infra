@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: attack-simulator
+  namespace: finflow
+  labels:
+    app: attack-simulator
+spec:
+  serviceAccountName: attack-simulator-sa
+  containers:
+    - name: attacker
+      image: bitnami/kubectl:latest
+      command: ["sleep", "3600"]

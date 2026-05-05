@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: attack-simulator-sa
+  namespace: finflow
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: attack-simulator-role
+  namespace: finflow
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get"]
+    resourceNames: ["attack-target"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+    resourceNames: ["attack-target"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: attack-simulator-role-binding
+  namespace: finflow
+subjects:
+  - kind: ServiceAccount
+    name: attack-simulator-sa
+    namespace: finflow
+roleRef:
+  kind: Role
+  name: attack-simulator-role
+  apiGroup: rbac.authorization.k8s.io
