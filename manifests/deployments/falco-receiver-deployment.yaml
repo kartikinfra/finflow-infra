@@ -13,9 +13,10 @@ spec:
       labels:
         app: falco-receiver
     spec:
+      serviceAccountName: falco-receiver-sa
       containers:
         - name: falco-receiver
-          image: kaka750/falco-receiver:v10-arm
+          image: kaka750/falco-receiver:v10.1-arm
           ports:
             - containerPort: 3000
           env:

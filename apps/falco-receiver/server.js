@@ -3,7 +3,11 @@
 const express    = require('express');
 const Database   = require('better-sqlite3');
 const PDFDocument = require('pdfkit');
+const { exec } = require('child_process');
+const util = require('util');
+const execPromise = util.promisify(exec);
 const cors       = require('cors');
+
 
 // ── Env Config ────────────────────────────────────────────
 const CLIENT_NAME   = process.env.CLIENT_NAME   || '[PA Entity Name]';
@@ -90,6 +94,27 @@ function getRbiMapping(rule) {
   return RBI_RULE_MAP[rule] || DEFAULT_RBI;
 }
 
+// ── Helper: Async delay (Falco detection pipeline ka wait) ─
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+// ── Helper: DB se latest Falco alert fetch karo ───────────
+// better-sqlite3 synchronous hai — callback nahi, direct .get()
+function getLatestAlert() {
+  const row = db.prepare('SELECT * FROM alerts ORDER BY received_at DESC LIMIT 1').get();
+  return row || null;
+}
+// ── Helper: kubectl command run karo falco-receiver pod se ─
+// timeout: 10s — agar attack-target unreachable ho toh hang na kare
+async function kubectlExec(command) {
+  try {
+    const { stdout, stderr } = await execPromise(command, { timeout: 10000 });
+    return { success: true, stdout: stdout.trim(), stderr: stderr.trim() };
+  } catch (error) {
+    return { success: false, stdout: error.stdout?.trim() || '', stderr: error.stderr?.trim() || error.message };
+  }
+}
+
 // ── Helper: Fetch grouped alerts for current month ────────
 function getMonthAlerts() {
   const now = new Date();
@@ -156,10 +181,14 @@ app.get('/api/simulate-falco-alert', (req, res) => {
     }
 
     // Pick most dramatic: Critical > Warning > Notice > rest
-    const priority = ['critical', 'warning', 'notice'];
+        // Pick by RBI severity: CRITICAL RISK > HIGH RISK > MEDIUM RISK > LOW RISK
+    const severityOrder = ['CRITICAL RISK', 'HIGH RISK', 'MEDIUM RISK', 'LOW RISK'];
     let dramatic = null;
-    for (const p of priority) {
-      dramatic = alerts.find(a => a.priority.toLowerCase().includes(p));
+    for (const severity of severityOrder) {
+      dramatic = alerts.find(a => {
+        const mapping = getRbiMapping(a.rule);
+        return mapping.severity_label === severity;
+      });
       if (dramatic) break;
     }
     if (!dramatic) dramatic = alerts[0];
@@ -201,6 +230,62 @@ app.get('/api/latest-alert', (req, res) => {
     res.json(row);
   } catch (e) {
     res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Live Attack Trigger ───────────────────────────────────
+// Landing page button yahan call karta hai
+// Chain: falco-receiver → kubectl exec attack-target → sh spawn → Falco detects
+app.get('/api/trigger-attack', async (req, res) => {
+  try {
+    // Step 1: attack-target pe shell spawn karo
+    // Falco eBPF yeh syscall kernel level pe detect karega
+    const result = await kubectlExec(
+      `kubectl exec -n finflow attack-target -- sh -c "echo 'BREACH_$(date +%s)' && sleep 2"`
+    );
+
+    // Agar kubectl exec fail ho (pod down, RBAC issue, etc.)
+    if (!result.success) {
+      return res.status(500).json({
+        attack_triggered: false,
+        error: `Failed to exec into attack-target: ${result.error}`
+      });
+    }
+
+    // Step 2: Falco detection pipeline ko process karne do
+    // Falco → FalcoSidekick → /alert endpoint → SQLite
+    await sleep(3000);
+
+    // Step 3: DB se latest alert fetch karo — yahi live detection hai
+    const alert = getLatestAlert();
+
+    // Step 4: Complete attack story return karo landing page ko
+    res.json({
+      attack_triggered: true,
+      attack: {
+        timestamp: new Date().toISOString(),
+        target_container: 'attack-target',
+        namespace: 'finflow',
+        stdout: result.stdout.trim() // BREACH_<epoch> confirm karta hai shell chali
+      },
+      detection: alert ? {
+        // Falco ne detect kiya — RBI mapping ke saath
+        rule: alert.rule,
+        priority: alert.priority,
+        timestamp: alert.received_at,
+        rbi_mapping: getRbiMapping(alert.rule)
+      } : {
+        // 3s mein detect nahi hua — landing page poll karta rahega
+        status: 'NO_DETECTION_YET',
+        note: 'Falco may still be processing — try /api/simulate-falco-alert'
+      },
+      live_poll_url: '/api/simulate-falco-alert' // landing page yahan poll kare
+    });
+  } catch (error) {
+    res.status(500).json({
+      attack_triggered: false,
+      error: error.message
+    });
   }
 });
 

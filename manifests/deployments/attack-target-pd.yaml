@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: attack-target
+  namespace: finflow
+  labels: 
+    app: attack-target
+spec:
+  containers:
+    - name: attack-target
+      image: alpine:latest
+      command: ["sleep","3600"]
