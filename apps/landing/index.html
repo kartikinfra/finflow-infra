@@ -307,9 +307,9 @@ h1, h2, h3, h4 { font-family: 'Syne', sans-serif; }
 }
 
 /* ─── Animations ─────────────────────────────────────────── */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -342,17 +342,52 @@ nav a:hover { color: var(--text-1) !important; }
 ::-webkit-scrollbar-track { background: var(--bg-base); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 
-/* ─── Chain Node ──────────────────────────────────────────── */
+/* ─── Chain Node (Attack Pipeline) ──────────────────────── */
 .chain-node {
   display: flex; align-items: center; gap: 12px;
   padding: 14px 18px;
   background: var(--bg-card);
   border: 1px solid var(--border-soft);
   border-radius: 12px;
+  opacity: 0.45;
+  transition: all 0.25s ease;
 }
 .chain-arrow {
   color: var(--text-3); font-size: 18px;
   display: flex; align-items: center; padding: 0 4px;
+}
+
+/* ── ATTACK PIPELINE STATES (injected) ─────────────────── */
+.chain-node.active {
+  border-color: var(--blue);
+  box-shadow: 0 0 14px rgba(59,130,246,0.18);
+  opacity: 1 !important;
+  background: rgba(59,130,246,0.06);
+}
+.chain-node.done {
+  border-color: var(--green);
+  opacity: 1 !important;
+  background: rgba(34,197,94,0.04);
+}
+.chain-node.done span:first-child {
+  color: var(--green);
+  background: rgba(34,197,94,0.12);
+}
+.chain-node.failed {
+  border-color: var(--red);
+  opacity: 1 !important;
+  background: rgba(248,113,113,0.04);
+}
+.chain-node.failed span:first-child {
+  color: var(--red);
+  background: rgba(248,113,113,0.12);
+}
+/* ── END ATTACK PIPELINE STATES ────────────────────────── */
+
+/* ─── Skeleton Pulse ─────────────────────────────────────── */
+@keyframes pulse {
+  0%,100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 
 /* ─── Utility ─────────────────────────────────────────────── */
@@ -376,6 +411,9 @@ nav a:hover { color: var(--text-1) !important; }
   border: 1px solid rgba(34,197,94,0.25);
   display: flex; align-items: center; justify-content: center;
   margin-top: 2px;
+}
+.hidden {
+  display: none !important;
 }
 </style>
 </head>
@@ -468,7 +506,7 @@ nav a:hover { color: var(--text-1) !important; }
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           Book 20-min RBI Readiness Call
         </a>
-        <a href="https://demo.kartikinfra.in/sample-rbi-report.pdf" target="_blank" class="btn-secondary">
+        <a href="https://alerts.kartikinfra.in/report" target="_blank" class="btn-secondary">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           Download Sample Report
         </a>
@@ -526,9 +564,9 @@ nav a:hover { color: var(--text-1) !important; }
       </div>
 
       <div class="stat-card">
-        <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--amber);margin-bottom:6px;">8×</div>
+        <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--amber);margin-bottom:6px;">8x</div>
         <div style="font-size:13px;color:var(--text-2);">ROI vs. RBI fine</div>
-        <div style="font-size:11px;color:var(--text-3);margin-top:4px;">₹1.25L setup · ₹10L penalty</div>
+        <div style="font-size:11px;color:var(--text-3);margin-top:4px;">1.25L setup / 10L penalty</div>
       </div>
 
     </div>
@@ -619,29 +657,29 @@ nav a:hover { color: var(--text-1) !important; }
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:40px;">
 
       <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px 24px;">
-        <div style="font-size:28px;margin-bottom:14px;">📋</div>
+        <div style="font-size:28px;margin-bottom:14px;">&#x1F4CB;</div>
         <h4 style="font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:8px;">We Write Your Monthly RCA</h4>
         <p style="font-size:13px;color:var(--text-2);line-height:1.6;">Every Falco alert is correlated to its OTel trace via documented forensic process. Kartik or his team writes the root cause analysis and corrective action — in language an RBI auditor accepts.</p>
         <div style="margin-top:14px;padding:10px 14px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;">
-          <p style="font-size:12px;color:var(--green);font-weight:600;">✓ Auditor-ready RCA · every alert · every month</p>
+          <p style="font-size:12px;color:var(--green);font-weight:600;">Auditor-ready RCA / every alert / every month</p>
         </div>
       </div>
 
       <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px 24px;">
-        <div style="font-size:28px;margin-bottom:14px;">📬</div>
+        <div style="font-size:28px;margin-bottom:14px;">&#x1F4EC;</div>
         <h4 style="font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:8px;">PDF in Your Inbox. Every 1st.</h4>
         <p style="font-size:13px;color:var(--text-2);line-height:1.6;">On the 1st of every month, your RBI-format monthly report arrives via email. Incidents, timestamps, traces, RCA, corrective actions — all filled. You forward it to the auditor.</p>
         <div style="margin-top:14px;padding:10px 14px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;">
-          <p style="font-size:12px;color:var(--green);font-weight:600;">✓ Zero writing · zero formatting · zero last-minute panic</p>
+          <p style="font-size:12px;color:var(--green);font-weight:600;">Zero writing / zero formatting / zero last-minute panic</p>
         </div>
       </div>
 
       <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px 24px;">
-        <div style="font-size:28px;margin-bottom:14px;">🛡️</div>
+        <div style="font-size:28px;margin-bottom:14px;">&#x1F6E1;</div>
         <h4 style="font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:8px;">Auditor Call? We'll Join.</h4>
         <p style="font-size:13px;color:var(--text-2);line-height:1.6;">In our Enterprise Assurance tier, Kartik personally joins your pre-audit call. He explains the detection stack, correlation methodology, and chain of custody — so your team doesn't have to.</p>
         <div style="margin-top:14px;padding:10px 14px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;">
-          <p style="font-size:12px;color:var(--green);font-weight:600;">✓ Expert defense · kernel-level to auditor-speak translation</p>
+          <p style="font-size:12px;color:var(--green);font-weight:600;">Expert defense / kernel-level to auditor-speak translation</p>
         </div>
       </div>
 
@@ -681,11 +719,12 @@ nav a:hover { color: var(--text-1) !important; }
     </div>
 
     <!-- EXHIBIT A — Falco -->
+    <!-- ═══ INJECTED: Full Attack Pipeline with step tracking ═══ -->
     <div id="exhibit-a" class="exhibit-card" style="margin-bottom:24px;">
       <div class="exhibit-card-header">
         <div style="display:flex;align-items:center;gap:12px;">
           <span class="badge-red">Exhibit A</span>
-          <span class="exhibit-label">Falco · Automated Incident Detection</span>
+          <span class="exhibit-label">Falco / Automated Incident Detection</span>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <span class="badge-blue">
@@ -694,7 +733,7 @@ nav a:hover { color: var(--text-1) !important; }
           </span>
           <button id="triggerFalcoBtn" style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);color:#F87171;font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;">
             <span style="width:7px;height:7px;background:#F87171;border-radius:50%;display:block;"></span>
-            Simulate Live Incident
+            Simulate Live Attack
           </button>
         </div>
       </div>
@@ -704,21 +743,62 @@ nav a:hover { color: var(--text-1) !important; }
           eBPF probes at the kernel level capture every privileged syscall. Falco pattern-matches them against RBI-mapped rules in real-time — no agent polling, no sampling lag.
         </p>
 
+        <!-- ═══ INJECTED: Attack Pipeline Steps (hidden by default) ═══ -->
+        <div id="attackPipeline" class="hidden" style="margin-bottom:20px;">
+          <p style="font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;font-weight:600;">Live Attack Pipeline</p>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <!-- Step 1 -->
+            <div class="chain-node" id="pipeline-step-1">
+              <span style="font-size:11px;font-weight:700;color:var(--blue);background:rgba(59,130,246,0.12);width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;">01</span>
+              <span style="font-size:11px;color:var(--text-2);">Trigger Attack</span>
+            </div>
+            <div class="chain-arrow">&#8594;</div>
+            <!-- Step 2 -->
+            <div class="chain-node" id="pipeline-step-2">
+              <span style="font-size:11px;font-weight:700;color:var(--blue);background:rgba(59,130,246,0.12);width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;">02</span>
+              <span style="font-size:11px;color:var(--text-2);">kubectl exec</span>
+            </div>
+            <div class="chain-arrow">&#8594;</div>
+            <!-- Step 3 -->
+            <div class="chain-node" id="pipeline-step-3">
+              <span style="font-size:11px;font-weight:700;color:var(--blue);background:rgba(59,130,246,0.12);width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;">03</span>
+              <span style="font-size:11px;color:var(--text-2);">Falco eBPF</span>
+            </div>
+            <div class="chain-arrow">&#8594;</div>
+            <!-- Step 4 -->
+            <div class="chain-node" id="pipeline-step-4">
+              <span style="font-size:11px;font-weight:700;color:var(--blue);background:rgba(59,130,246,0.12);width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%;">04</span>
+              <span style="font-size:11px;color:var(--text-2);">RBI Report Ready</span>
+            </div>
+          </div>
+        </div>
+        <!-- ═══ END ATTACK PIPELINE STEPS ═══ -->
+
+        <!-- ═══ INJECTED: Loading Skeleton (hidden by default) ═══ -->
+        <div id="attackSkeleton" class="hidden" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+          <div style="height:14px;background:var(--bg-card-alt);border-radius:4px;width:40%;animation:pulse 1.5s ease-in-out infinite;"></div>
+          <div style="height:14px;background:var(--bg-card-alt);border-radius:4px;animation:pulse 1.5s ease-in-out infinite;"></div>
+          <div style="height:14px;background:var(--bg-card-alt);border-radius:4px;width:65%;animation:pulse 1.5s ease-in-out infinite;"></div>
+        </div>
+        <!-- ═══ END SKELETON ═══ -->
+
         <!-- Static preview (always visible) -->
-        <div class="terminal" style="margin-bottom:16px;">
-          <div><span class="t-muted">2025-10-12T04:31:22Z</span> <span class="t-red">[CRITICAL]</span> <span class="t-white">Falco Rule Triggered</span></div>
-          <div><span class="t-muted">rule:</span>      <span class="t-amber">Terminal shell in container</span></div>
-          <div><span class="t-muted">output:</span>    <span class="t-white">A shell was spawned in a container (user=root container=payment-svc)</span></div>
-          <div><span class="t-muted">priority:</span>  <span class="t-red">CRITICAL</span></div>
-          <div><span class="t-muted">source:</span>    <span class="t-green">syscall/eBPF</span> <span class="t-muted">· kernel probe</span></div>
-          <div><span class="t-muted">trace_id:</span>  <span class="t-blue">4f2a9e1c-8d3b-42f1-b7e5-1a8c3d9f2b6e</span></div>
+                
+        <div id="falcoTerminal" class="terminal" style="margin-bottom:16px;">
+          <div><span class="t-muted">STATUS:</span> <span class="t-green">System Idle</span> <span class="t-muted">/ Watching kernel events...</span></div>
+          <div><span class="t-muted">rule:</span>      <span class="t-amber">awaiting trigger</span></div>
+          <div><span class="t-muted">output:</span>    <span class="t-white">No active incident. Click 'Simulate Live Attack' to trigger a real detection.</span></div>
+          <div><span class="t-muted">priority:</span>  <span class="t-muted">NONE</span></div>
+          <div><span class="t-muted">source:</span>    <span class="t-green">syscall/eBPF</span> <span class="t-muted">/ kernel probe active</span></div>
+          <div><span class="t-muted">trace_id:</span>  <span class="t-muted">idle</span></div>
         </div>
 
         <!-- Dynamic Falco report (hidden until button click) -->
+               
         <div id="falcoReport" class="hidden">
           <div style="height:1px;background:var(--border-soft);margin-bottom:16px;"></div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-            <span style="font-size:12px;font-weight:600;color:var(--red);">⚡ Live Incident Detected</span>
+            <span style="font-size:12px;font-weight:600;color:var(--red);">Live Incident Detected</span>
             <span id="falcoTimestamp" style="font-family:monospace;font-size:11px;color:var(--text-3);"></span>
           </div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;">
@@ -726,7 +806,7 @@ nav a:hover { color: var(--text-1) !important; }
             <div><p style="font-size:11px;color:var(--text-3);margin-bottom:4px;">MTTD</p><p id="falcoMttd" style="font-weight:600;font-size:15px;"></p></div>
             <div><p style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Falco Rule</p><p id="falcoRule" style="font-weight:600;color:var(--amber);font-size:13px;"></p></div>
           </div>
-          <div class="terminal">
+          <div style="background:#020508;border:1px solid #0D1F35;border-radius:12px;padding:16px 20px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;color:#94A3B8;">
             <div><span class="t-muted">output:</span>     <span id="falcoOutput" class="t-white"></span></div>
             <div style="margin-top:8px;"><span class="t-muted">rca:</span>        <span id="rcaText" class="t-blue"></span></div>
             <div style="margin-top:8px;"><span class="t-muted">action:</span>     <span id="actionText" class="t-green"></span></div>
@@ -735,13 +815,14 @@ nav a:hover { color: var(--text-1) !important; }
 
       </div>
     </div>
+    <!-- ═══ END INJECTED EXHIBIT A ═══ -->
 
     <!-- EXHIBIT B — Tempo / TraceQL -->
     <div id="exhibit-b" class="exhibit-card" style="margin-bottom:24px;">
       <div class="exhibit-card-header">
         <div style="display:flex;align-items:center;gap:12px;">
           <span class="badge-indigo">Exhibit B</span>
-          <span class="exhibit-label">Tempo · TraceQL · The Digital Fingerprint</span>
+          <span class="exhibit-label">Tempo / TraceQL / The Digital Fingerprint</span>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <span class="badge-blue">1:1 Root Cause Map</span>
@@ -761,9 +842,9 @@ nav a:hover { color: var(--text-1) !important; }
           <div><span class="t-muted">$ </span><span class="t-blue">traceql query</span> <span class="t-green">'{ .incident_id = "INC-1041" }'</span></div>
           <div style="margin-top:4px;"><span class="t-muted">trace_id:</span>  <span class="t-white">0af2bc3d1e4f5a6b7c8d9e0f1a2b3c4d</span></div>
           <div><span class="t-muted">duration:</span>  <span class="t-amber">4.23s</span> <span class="t-muted">(p99 threshold: 500ms)</span></div>
-          <div><span class="t-muted">services:</span>  <span class="t-white">api-gateway → payment-svc → postgres</span></div>
+          <div><span class="t-muted">services:</span>  <span class="t-white">api-gateway &#8594; payment-svc &#8594; postgres</span></div>
           <div><span class="t-muted">root:</span>      <span class="t-blue">DB sequential scan (missing idx_txn_created_at)</span></div>
-          <div style="margin-top:8px;"><span class="t-muted">⎳ Click "Trace Root Cause" to load live data ↑</span></div>
+          <div style="margin-top:8px;"><span class="t-muted">Click "Trace Root Cause" to load live data</span></div>
         </div>
 
         <!-- Skeleton -->
@@ -781,8 +862,8 @@ nav a:hover { color: var(--text-1) !important; }
             <div><p style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Trace ID</p><p id="tempoTraceId" style="font-family:monospace;font-size:10px;color:var(--text-2);word-break:break-all;"></p></div>
           </div>
           <div class="terminal" style="margin-bottom:16px;">
-            <div><span class="t-muted">root_cause:</span> <span class="t-blue">DB sequential scan → missing index → CPU saturation → latency spike</span></div>
-            <div style="margin-top:4px;"><span class="t-muted">services:</span>   <span class="t-white">api-gateway → payment-svc → postgres</span></div>
+            <div><span class="t-muted">root_cause:</span> <span class="t-blue">DB sequential scan &#8594; missing index &#8594; CPU saturation &#8594; latency spike</span></div>
+            <div style="margin-top:4px;"><span class="t-muted">services:</span>   <span class="t-white">api-gateway &#8594; payment-svc &#8594; postgres</span></div>
           </div>
           <a id="grafanaLink" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.3);color:var(--indigo);font-size:13px;font-weight:600;padding:10px 18px;border-radius:10px;text-decoration:none;transition:all 0.2s;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
@@ -798,7 +879,7 @@ nav a:hover { color: var(--text-1) !important; }
       <div class="exhibit-card-header">
         <div style="display:flex;align-items:center;gap:12px;">
           <span class="badge-green">Exhibit C</span>
-          <span class="exhibit-label">RBI Report · Auditor-Ready Format</span>
+          <span class="exhibit-label">RBI Report / Auditor-Ready Format</span>
         </div>
         <div class="verified-seal">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -817,8 +898,8 @@ nav a:hover { color: var(--text-1) !important; }
           <div style="background:#0A1220;padding:20px 24px;border-bottom:1px solid #0D1F35;display:flex;justify-content:space-between;align-items:flex-start;">
             <div>
               <p style="font-size:10px;color:var(--text-3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;">RESERVE BANK OF INDIA — PAYMENT AGGREGATOR COMPLIANCE</p>
-              <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text-1);margin-bottom:2px;">Monthly Incident Report · October 2025</h3>
-              <p style="font-size:12px;color:var(--text-3);">Payment Aggregator: [Your Company] · CIN: U74999MH2022PTC123456</p>
+              <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text-1);margin-bottom:2px;">Monthly Incident Report / October 2025</h3>
+              <p style="font-size:12px;color:var(--text-3);">Payment Aggregator: [Your Company] / CIN: U74999MH2022PTC123456</p>
             </div>
             <div style="text-align:right;">
               <div class="verified-seal" style="font-size:11px;padding:6px 12px;margin-bottom:6px;">
@@ -834,7 +915,7 @@ nav a:hover { color: var(--text-1) !important; }
               <div style="background:#0A1428;border:1px solid #0D1F35;border-radius:8px;padding:12px;">
                 <p style="font-size:10px;color:var(--text-3);margin-bottom:4px;">INCIDENTS THIS MONTH</p>
                 <p style="font-size:22px;font-family:'Syne',sans-serif;font-weight:700;color:var(--red);">3</p>
-                <p style="font-size:10px;color:var(--text-3);">All resolved · RCA attached</p>
+                <p style="font-size:10px;color:var(--text-3);">All resolved / RCA attached</p>
               </div>
               <div style="background:#0A1428;border:1px solid #0D1F35;border-radius:8px;padding:12px;">
                 <p style="font-size:10px;color:var(--text-3);margin-bottom:4px;">AVG MTTD</p>
@@ -863,22 +944,22 @@ nav a:hover { color: var(--text-1) !important; }
               </div>
               <div style="padding:10px 14px;display:grid;grid-template-columns:1fr 2fr 1fr 1fr;gap:8px;border-top:1px solid #0D1F35;">
                 <span style="font-family:monospace;font-size:11px;color:var(--text-2);">INC-1041</span>
-                <span style="font-size:11px;color:var(--text-2);">API latency spike · DB index missing</span>
+                <span style="font-size:11px;color:var(--text-2);">API latency spike / DB index missing</span>
                 <span style="font-size:10px;background:rgba(251,191,36,0.1);color:#FBBF24;padding:2px 6px;border-radius:4px;height:fit-content;">HIGH</span>
                 <span style="font-size:10px;background:rgba(34,197,94,0.1);color:#22C55E;padding:2px 6px;border-radius:4px;height:fit-content;">Resolved</span>
               </div>
             </div>
-            <p style="font-size:10px;color:var(--text-3);text-align:center;margin-top:12px;">… and more incidents with full trace links, RCA, and corrective actions</p>
+            <p style="font-size:10px;color:var(--text-3);text-align:center;margin-top:12px;">... and more incidents with full trace links, RCA, and corrective actions</p>
           </div>
         </div>
 
         <div style="display:flex;gap:12px;flex-wrap:wrap;">
-          <a href="https://demo.kartikinfra.in/sample-rbi-report.pdf" target="_blank" class="btn-primary" style="font-size:14px;padding:12px 22px;">
+          <a href="https://alerts.kartikinfra.in/report" target="_blank" class="btn-primary" style="font-size:14px;padding:12px 22px;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Download Sample Report
           </a>
           <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:12px 18px;font-size:13px;color:var(--text-2);">
-            <span style="color:var(--green);font-weight:600;">Real audit format</span> · Incidents, timestamps, RCA, corrective actions · Auto-generated from live data
+            <span style="color:var(--green);font-weight:600;">Real audit format</span> / Incidents, timestamps, RCA, corrective actions / Auto-generated from live data
           </div>
         </div>
 
@@ -917,7 +998,7 @@ nav a:hover { color: var(--text-1) !important; }
           <div><span class="t-green">$</span> <span class="t-white">helm install finflow</span></div>
           <div><span class="t-muted">  finflow/rbi-shield</span></div>
           <div><span class="t-muted">  --namespace monitoring</span></div>
-          <div style="margin-top:6px;"><span class="t-green">✔ Deployed in 4m 12s</span></div>
+          <div style="margin-top:6px;"><span class="t-green">Deployed in 4m 12s</span></div>
         </div>
       </div>
 
@@ -927,12 +1008,12 @@ nav a:hover { color: var(--text-1) !important; }
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
           <h4 style="font-size:15px;font-weight:700;color:var(--text-1);">Correlate</h4>
         </div>
-        <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:14px;">Every Falco alert is matched to its OpenTelemetry trace ID via documented forensic correlation — timestamp + pod metadata → structured logs → exact trace.</p>
+        <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:14px;">Every Falco alert is matched to its OpenTelemetry trace ID via documented forensic correlation — timestamp + pod metadata to structured logs to exact trace.</p>
         <div class="terminal" style="font-size:11px;padding:10px 14px;">
           <div><span class="t-red">ALERT</span> <span class="t-amber">INC-1023</span></div>
-          <div><span class="t-muted">→ matching trace_id via forensic process...</span></div>
-          <div><span class="t-blue">→ 4f2a9e1c-8d3b-42f1</span></div>
-          <div><span class="t-green">→ RCA: debug endpoint exposed</span></div>
+          <div><span class="t-muted">matching trace_id via forensic process...</span></div>
+          <div><span class="t-blue">4f2a9e1c-8d3b-42f1</span></div>
+          <div><span class="t-green">RCA: debug endpoint exposed</span></div>
         </div>
       </div>
 
@@ -946,7 +1027,7 @@ nav a:hover { color: var(--text-1) !important; }
         <div class="terminal" style="font-size:11px;padding:10px 14px;">
           <div><span class="t-muted">report_oct_2025.pdf</span></div>
           <div><span class="t-muted">generation time: 2025-10-01 07:08:54 UTC</span></div>
-          <div><span class="t-green">✔ Sent to: you@fintech.in</span></div>
+          <div><span class="t-green">Sent to: you@fintech.in</span></div>
         </div>
       </div>
 
@@ -958,8 +1039,8 @@ nav a:hover { color: var(--text-1) !important; }
         </div>
         <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:14px;">Hand the auditor the PDF. Show them the live Grafana trace. Watch them check the evidence chain. Audit complete — no drama, no scrambling.</p>
         <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:10px 14px;">
-          <p style="font-size:12px;color:var(--green);font-weight:600;">Annex 1.3 compliance: ✓</p>
-          <p style="font-size:11px;color:var(--text-3);">RBI PA Master Direction · Sep 2025</p>
+          <p style="font-size:12px;color:var(--green);font-weight:600;">Annex 1.3 compliance</p>
+          <p style="font-size:11px;color:var(--text-3);">RBI PA Master Direction / Sep 2025</p>
         </div>
       </div>
 
@@ -1014,7 +1095,7 @@ nav a:hover { color: var(--text-1) !important; }
             <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">CPU Overhead</span>
           </div>
           <p style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--green);margin-bottom:4px;">&lt;1%</p>
-          <p style="font-size:12px;color:var(--text-3);">eBPF · no userspace polling · no agent process</p>
+          <p style="font-size:12px;color:var(--text-3);">eBPF / no userspace polling / no agent process</p>
         </div>
 
         <div style="background:var(--bg-card);border:1px solid var(--border-soft);border-radius:14px;padding:20px 18px;">
@@ -1023,7 +1104,7 @@ nav a:hover { color: var(--text-1) !important; }
             <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Encryption</span>
           </div>
           <p style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--blue);margin-bottom:4px;">AES-256</p>
-          <p style="font-size:12px;color:var(--text-3);">All stored traces · at rest and in transit</p>
+          <p style="font-size:12px;color:var(--text-3);">All stored traces / at rest and in transit</p>
         </div>
 
         <div style="background:var(--bg-card);border:1px solid var(--border-soft);border-radius:14px;padding:20px 18px;">
@@ -1032,7 +1113,7 @@ nav a:hover { color: var(--text-1) !important; }
             <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Data Sovereignty</span>
           </div>
           <p style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--indigo);margin-bottom:4px;">100%</p>
-          <p style="font-size:12px;color:var(--text-3);">In-VPC · zero external API calls</p>
+          <p style="font-size:12px;color:var(--text-3);">In-VPC / zero external API calls</p>
         </div>
 
         <div style="background:var(--bg-card);border:1px solid var(--border-soft);border-radius:14px;padding:20px 18px;">
@@ -1041,7 +1122,7 @@ nav a:hover { color: var(--text-1) !important; }
             <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Setup Time</span>
           </div>
           <p style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--amber);margin-bottom:4px;">15 min</p>
-          <p style="font-size:12px;color:var(--text-3);">k3s / K8s · Helm chart · zero custom code</p>
+          <p style="font-size:12px;color:var(--text-3);">k3s / K8s / Helm chart / zero custom code</p>
         </div>
 
         <div style="background:var(--bg-card);border:1px solid var(--border-soft);border-radius:14px;padding:20px 18px;">
@@ -1050,7 +1131,7 @@ nav a:hover { color: var(--text-1) !important; }
             <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Probe Layer</span>
           </div>
           <p style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--green);margin-bottom:4px;">Kernel</p>
-          <p style="font-size:12px;color:var(--text-3);">eBPF · can't be bypassed by userspace</p>
+          <p style="font-size:12px;color:var(--text-3);">eBPF / can't be bypassed by userspace</p>
         </div>
 
         <div style="background:var(--bg-card);border:1px solid var(--border-soft);border-radius:14px;padding:20px 18px;">
@@ -1059,7 +1140,7 @@ nav a:hover { color: var(--text-1) !important; }
             <span style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">Compliance Ref</span>
           </div>
           <p style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--blue);margin-bottom:4px;line-height:1.2;">Annex 1.3</p>
-          <p style="font-size:12px;color:var(--text-3);">RBI PA Master Direction · Sep 2025</p>
+          <p style="font-size:12px;color:var(--text-3);">RBI PA Master Direction / Sep 2025</p>
         </div>
 
       </div>
@@ -1092,7 +1173,7 @@ nav a:hover { color: var(--text-1) !important; }
           <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Payment Aggregator or Digital Lending startup (Seed / Series A)</span></div>
           <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Applied for or received RBI Payment Aggregator authorization</span></div>
           <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Running Kubernetes (or planning to within 1 month)</span></div>
-          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Monthly RBI reporting currently takes &gt;2 days or is done manually</span></div>
+          <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Monthly RBI reporting currently takes more than 2 days or is done manually</span></div>
           <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Have a CISO or security-minded engineer on your team</span></div>
         </div>
       </div>
@@ -1151,8 +1232,8 @@ nav a:hover { color: var(--text-1) !important; }
       <!-- Tier 1: Setup -->
       <div class="pricing-card">
         <p style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:8px;">One-Time Setup</p>
-        <p style="font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:var(--text-1);margin-bottom:4px;">₹1,25,000</p>
-        <p style="font-size:13px;color:var(--text-2);margin-bottom:28px;">3 weeks · your cluster · done right</p>
+        <p style="font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:var(--text-1);margin-bottom:4px;">1,25,000</p>
+        <p style="font-size:13px;color:var(--text-2);margin-bottom:28px;">3 weeks / your cluster / done right</p>
         <div style="height:1px;background:var(--border-soft);margin-bottom:20px;"></div>
         <div style="display:flex;flex-direction:column;gap:10px;">
           <div class="check-item"><div class="icon-wrap"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><span>Falco + eBPF kernel-level runtime detection</span></div>
@@ -1169,7 +1250,7 @@ nav a:hover { color: var(--text-1) !important; }
       <!-- Tier 2: Managed Basic (FEATURED) -->
       <div class="pricing-card featured">
         <p style="font-size:11px;color:rgba(147,197,253,0.7);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:8px;">Managed Compliance</p>
-        <p style="font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:var(--text-1);margin-bottom:4px;">₹85,000<span style="font-size:18px;font-weight:400;color:var(--text-2);">/mo</span></p>
+        <p style="font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:var(--text-1);margin-bottom:4px;">85,000<span style="font-size:18px;font-weight:400;color:var(--text-2);">/mo</span></p>
         <p style="font-size:13px;color:var(--text-2);margin-bottom:28px;">Monthly PDF + RCA, done for you</p>
         <div style="height:1px;background:rgba(59,130,246,0.2);margin-bottom:20px;"></div>
         <div style="display:flex;flex-direction:column;gap:10px;">
@@ -1186,8 +1267,8 @@ nav a:hover { color: var(--text-1) !important; }
 
       <!-- Tier 3: Premium -->
       <div class="pricing-card" style="background:linear-gradient(145deg,#0D1D38,#08111F);border-color:rgba(129,140,248,0.25);">
-        <p style="font-size:11px;color:var(--indigo);opacity:0.8;text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:8px;">Premium · Human-in-the-Loop</p>
-        <p style="font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:var(--text-1);margin-bottom:4px;">₹1,75,000<span style="font-size:18px;font-weight:400;color:var(--text-2);">/mo</span></p>
+        <p style="font-size:11px;color:var(--indigo);opacity:0.8;text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:8px;">Premium / Human-in-the-Loop</p>
+        <p style="font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:var(--text-1);margin-bottom:4px;">1,75,000<span style="font-size:18px;font-weight:400;color:var(--text-2);">/mo</span></p>
         <p style="font-size:13px;color:var(--text-2);margin-bottom:28px;">Kartik writes your RCA + audit support</p>
         <div style="height:1px;background:rgba(129,140,248,0.15);margin-bottom:20px;"></div>
         <div style="display:flex;flex-direction:column;gap:10px;">
@@ -1206,12 +1287,12 @@ nav a:hover { color: var(--text-1) !important; }
 
     <!-- ROI Banner -->
     <div class="roi-banner">
-      <div style="font-size:32px;">💸</div>
+      <div style="font-size:32px;">&#x1F4B8;</div>
       <div>
         <p style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text-1);margin-bottom:4px;">
-          ₹1.25L setup <span style="color:var(--text-3);font-weight:400;">vs</span> <span style="color:var(--red);">₹10L RBI fine</span>
+          1.25L setup <span style="color:var(--text-3);font-weight:400;">vs</span> <span style="color:var(--red);">10L RBI fine</span>
         </p>
-        <p style="font-size:14px;color:var(--text-2);">That's an <strong style="color:var(--green);">8× return before your first audit.</strong> And that's before counting the reputational damage of a failed inspection.</p>
+        <p style="font-size:14px;color:var(--text-2);">That's an <strong style="color:var(--green);">8x return before your first audit.</strong> And that's before counting the reputational damage of a failed inspection.</p>
       </div>
     </div>
 
@@ -1253,10 +1334,10 @@ nav a:hover { color: var(--text-1) !important; }
         <!-- Bio -->
         <div>
           <h3 style="font-size:22px;font-weight:700;letter-spacing:-0.01em;margin-bottom:4px;">Kartik Kakodiya</h3>
-          <p style="font-size:13px;color:var(--text-3);margin-bottom:16px;">Infrastructure Engineer · Kubernetes · eBPF · Fintech Security</p>
+          <p style="font-size:13px;color:var(--text-3);margin-bottom:16px;">Infrastructure Engineer / Kubernetes / eBPF / Fintech Security</p>
 
           <p style="font-size:14px;color:var(--text-2);line-height:1.75;margin-bottom:14px;">
-            I run the <a href="https://github.com/kartikinfra/finflow-infra" target="_blank" style="color:var(--blue);text-decoration:none;font-weight:500;">Startup Disaster Lab</a> — a live, production-grade fintech Kubernetes cluster where I deliberately break infrastructure, instrument kernel events with eBPF, and document everything the way RBI expects it to be documented.
+            I run the <a href="https://github.com/kartikinfra/finflow-infra" target="_blank" style="color:var(--blue);text-decoration:none;font-weight:500;">Startup Kartik Infra Lab</a> — a live, production-grade fintech Kubernetes cluster where I deliberately break infrastructure, instrument kernel events with eBPF, and document everything the way RBI expects it to be documented.
           </p>
           <p style="font-size:14px;color:var(--text-2);line-height:1.75;margin-bottom:20px;">
             Every incident in our Evidence Vault happened on this cluster. Every report was generated from real data. I've built this because I believe <strong style="color:var(--text-1);">compliance shouldn't require a security degree</strong> — just the right infrastructure.
@@ -1272,9 +1353,9 @@ nav a:hover { color: var(--text-1) !important; }
             </a>
             <a href="https://github.com/kartikinfra/finflow-infra" target="_blank" class="btn-ghost">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-              Startup Disaster Lab
+              Kartik Infra Lab
             </a>
-            <a href="https://demo.kartikinfra.in/sample-rbi-report.pdf" target="_blank" class="btn-ghost">
+            <a href="https://alert.kartikinfra.in/report" target="_blank" class="btn-ghost">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               Sample Report
             </a>
@@ -1320,7 +1401,7 @@ nav a:hover { color: var(--text-1) !important; }
     </div>
 
     <p style="font-size:13px;color:var(--text-3);">
-      No pitch. Just honest infrastructure assessment. ·
+      No pitch. Just honest infrastructure assessment. /
       <a href="https://github.com/kartikinfra/finflow-infra" target="_blank" style="color:var(--blue);text-decoration:none;">View source on GitHub</a>
     </p>
 
@@ -1339,7 +1420,7 @@ nav a:hover { color: var(--text-1) !important; }
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       </div>
       <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--text-2);">FinFlow</span>
-      <span style="font-size:12px;color:var(--text-3);">· Built by <a href="https://linkedin.com/in/kartikk09" target="_blank" style="color:var(--blue);text-decoration:none;">Kartik Kakodiya</a></span>
+      <span style="font-size:12px;color:var(--text-3);">/ Built by <a href="https://linkedin.com/in/kartikk09" target="_blank" style="color:var(--blue);text-decoration:none;">Kartik Kakodiya</a></span>
     </div>
 
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -1350,7 +1431,7 @@ nav a:hover { color: var(--text-1) !important; }
     </div>
 
     <a href="https://github.com/kartikinfra/finflow-infra" target="_blank" style="font-size:13px;color:var(--blue);text-decoration:none;display:flex;align-items:center;gap:6px;">
-      GitHub →
+      GitHub &#8594;
     </a>
 
   </div>
@@ -1366,6 +1447,59 @@ nav a:hover { color: var(--text-1) !important; }
   .section { padding: 64px 0; }
   .kartik-card { padding: 28px 20px !important; }
   .kartik-card > div { grid-template-columns: 1fr !important; }
+
+  /* ── Terminal blocks: horizontal scroll on mobile ── */
+  .terminal,
+  #falcoTerminal,
+  #falcoReport > div[style*="background:#020508"] {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    word-break: keep-all;
+  }
+  .terminal div,
+  #falcoTerminal div,
+  #falcoReport > div[style*="background:#020508"] div {
+    white-space: nowrap;
+  }
+
+  /* ── Exhibit cards: reduce padding on mobile ── */
+  .exhibit-card > div[style*="padding:24px"] {
+    padding: 16px 12px !important;
+  }
+  .exhibit-card-header {
+    padding: 10px 12px !important;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* ── Live Attack Pipeline: stack vertically on mobile ── */
+  #attackPipeline > div {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0 !important;
+  }
+  #attackPipeline .chain-arrow {
+    transform: rotate(90deg);
+    padding: 2px 10px;
+    font-size: 14px;
+    align-self: flex-start;
+    margin-left: 8px;
+  }
+  #attackPipeline .chain-node {
+    width: 100%;
+    max-width: 260px;
+  }
+
+  /* ── Pipeline label spacing ── */
+  #attackPipeline > p {
+    margin-bottom: 8px !important;
+  }
+
+  /* ── Stat cards: compact on mobile ── */
+  .stat-card {
+    padding: 18px 12px !important;
+  }
 }
 @keyframes pulse {
   0%,100% { opacity: 1; }
@@ -1374,7 +1508,32 @@ nav a:hover { color: var(--text-1) !important; }
 </style>
 
 
-<!-- ─── JavaScript ─────────────────────────────────────── -->
+<!-- ═══ INJECTED: Full Attack Pipeline JavaScript ═══ -->
+<script>
+// ─── Attack Pipeline Utilities ──────────────────────
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function updatePipelineStep(step, status) {
+  const el = document.getElementById('pipeline-step-' + step);
+  if (!el) return;
+  el.classList.remove('active', 'done', 'failed');
+  if (status === 'active') el.classList.add('active');
+  if (status === 'done') el.classList.add('done');
+  if (status === 'failed') el.classList.add('failed');
+}
+
+function resetPipeline() {
+  [1, 2, 3, 4].forEach(function(i) { updatePipelineStep(i, ''); });
+}
+
+// ─── End Attack Pipeline Utilities ──────────────────
+</script>
+<!-- ═══ END INJECTED JAVASCRIPT ═══ -->
+
+
+<!-- ─── Main JavaScript ─────────────────────────────────────── -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -1393,43 +1552,118 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(e) {}
   });
 
-  // ── Falco Button ──────────────────────────────────────
+  // ═══ INJECTED: Falco Live Attack Button (replaces old logic) ═══
+    // ── Falco Live Attack Button (single terminal transform) ──
   const falcoBtn = document.getElementById('triggerFalcoBtn');
   const falcoReport = document.getElementById('falcoReport');
+  const falcoTerminal = document.getElementById('falcoTerminal');
+  const attackPipeline = document.getElementById('attackPipeline');
+  const attackSkeleton = document.getElementById('attackSkeleton');
   const error = document.getElementById('error');
 
+  const falcoMttd = document.getElementById('falcoMttd');
+  const falcoTimestamp = document.getElementById('falcoTimestamp');
+  const falcoIncId = document.getElementById('falcoIncId');
+  const falcoRule = document.getElementById('falcoRule');
+  const falcoOutput = document.getElementById('falcoOutput');
+  const rcaText = document.getElementById('rcaText');
+  const actionText = document.getElementById('actionText');
+
+  function setTerminalLive(data, incidentId) {
+    falcoTerminal.innerHTML = `
+      <div><span class="t-muted">${data.detection.timestamp}</span> <span class="t-red">[CRITICAL]</span> <span class="t-white">Falco Rule Triggered</span></div>
+      <div><span class="t-muted">rule:</span>      <span class="t-amber">${data.detection.rule}</span></div>
+      <div><span class="t-muted">output:</span>    <span class="t-white">A shell was spawned in a container (user=root container=${data.attack.target_container})</span></div>
+      <div><span class="t-muted">priority:</span>  <span class="t-red">${data.detection.priority.toUpperCase()}</span></div>
+      <div><span class="t-muted">source:</span>    <span class="t-green">syscall/eBPF</span> <span class="t-muted">/ kernel probe</span></div>
+      <div><span class="t-muted">trace_id:</span>  <span class="t-blue">${incidentId}</span></div>
+    `;
+  }
+
+  function setTerminalIdle() {
+    falcoTerminal.innerHTML = `
+      <div><span class="t-muted">STATUS:</span> <span class="t-green">System Idle</span> <span class="t-muted">/ Watching kernel events...</span></div>
+      <div><span class="t-muted">rule:</span>      <span class="t-amber">awaiting trigger</span></div>
+      <div><span class="t-muted">output:</span>    <span class="t-white">No active incident. Click 'Simulate Live Attack' to trigger a real detection.</span></div>
+      <div><span class="t-muted">priority:</span>  <span class="t-muted">NONE</span></div>
+      <div><span class="t-muted">source:</span>    <span class="t-green">syscall/eBPF</span> <span class="t-muted">/ kernel probe active</span></div>
+      <div><span class="t-muted">trace_id:</span>  <span class="t-muted">idle</span></div>
+    `;
+  }
+
   falcoBtn.addEventListener('click', async () => {
+    if (falcoBtn.disabled) return;
+
     falcoBtn.disabled = true;
-    falcoBtn.style.opacity = '0.6';
-    falcoBtn.innerHTML = '<span style="width:7px;height:7px;background:#F87171;border-radius:50%;display:block;animation:pulse 1s infinite;"></span> Detecting...';
+    falcoBtn.style.opacity = '0.7';
+    falcoBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Probing Kernel...';
+
     falcoReport.classList.add('hidden');
     error.classList.add('hidden');
+    attackPipeline.classList.remove('hidden');
+    attackSkeleton.classList.add('hidden');
+
+    resetPipeline();
+
+    updatePipelineStep(1, 'active');
+    await sleep(300);
+    updatePipelineStep(1, 'done');
+
+    updatePipelineStep(2, 'active');
+    attackSkeleton.classList.remove('hidden');
+
+    const attackStart = performance.now();
 
     try {
-      const start = performance.now();
-      const res = await fetch('https://alerts.kartikinfra.in/api/simulate-falco-alert');
-      if (!res.ok) throw new Error('API error');
-      const data = await res.json();
-      const mttd = ((performance.now() - start) / 1000).toFixed(2) + 's';
+      const response = await fetch('https://alerts.kartikinfra.in/api/trigger-attack');
+      if (!response.ok) throw new Error('Backend responded with ' + response.status);
+      const data = await response.json();
 
-      document.getElementById('falcoMttd').innerText = mttd;
-      document.getElementById('falcoTimestamp').innerText = data.timestamp;
-      document.getElementById('falcoIncId').innerText = data.incidentId;
-      document.getElementById('falcoRule').innerText = data.falcoRule;
-      document.getElementById('falcoOutput').innerText = data.falcoOutput;
-      document.getElementById('rcaText').innerText = data.rca;
-      document.getElementById('actionText').innerText = data.preventiveAction;
+      updatePipelineStep(2, 'done');
+      attackSkeleton.classList.add('hidden');
 
-      falcoReport.classList.remove('hidden');
-    } catch {
-      error.innerText = '⚠ Demo API unreachable. This happens when the cluster is sleeping. Try again or check GitHub for the latest status.';
+      updatePipelineStep(3, 'active');
+
+      if (data && data.detection && data.detection.rule) {
+        await sleep(500);
+        updatePipelineStep(3, 'done');
+
+        updatePipelineStep(4, 'active');
+        await sleep(300);
+        updatePipelineStep(4, 'done');
+
+        const incidentId = 'INC-' + data.attack.stdout;
+        const mttdSeconds = ((performance.now() - attackStart) / 1000).toFixed(2);
+
+        setTerminalLive(data, incidentId);
+
+        falcoMttd.innerText = mttdSeconds + 's';
+        falcoTimestamp.innerText = data.detection.timestamp;
+        falcoIncId.innerText = incidentId;
+        falcoRule.innerText = data.detection.rule;
+        falcoOutput.innerText = 'A shell was spawned in a container (user=root container=' + data.attack.target_container + ')';
+        rcaText.innerText = data.detection.rbi_mapping.rca;
+        actionText.innerText = data.detection.rbi_mapping.corrective_action;
+
+        falcoReport.classList.remove('hidden');
+      } else {
+        throw new Error('Detection payload incomplete');
+      }
+    } catch (err) {
+      console.error('Live attack error:', err);
+      updatePipelineStep(3, 'failed');
+      updatePipelineStep(4, 'failed');
+      attackSkeleton.classList.add('hidden');
+      setTerminalIdle();
+      error.innerText = 'Live attack demo temporarily unavailable. The cluster may be sleeping. Try again in 30 seconds.';
       error.classList.remove('hidden');
     } finally {
       falcoBtn.disabled = false;
       falcoBtn.style.opacity = '1';
-      falcoBtn.innerHTML = '<span style="width:7px;height:7px;background:#F87171;border-radius:50%;display:block;"></span> Simulate Live Incident';
+      falcoBtn.innerHTML = '<span style="width:7px;height:7px;background:#F87171;border-radius:50%;display:block;"></span> Simulate Live Attack';
     }
   });
+  // ═══ END INJECTED FALCO BUTTON LOGIC ═══
 
   // ── Tempo Button ──────────────────────────────────────
   const tempoBtn = document.getElementById('triggerTempoBtn');
@@ -1468,7 +1702,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       tempoReport.classList.remove('hidden');
     } catch {
-      error.innerText = '⚠ Trace API unreachable. The cluster may be sleeping. Try again in 30 seconds or view the GitHub repo for status.';
+      error.innerText = 'Trace API unreachable. The cluster may be sleeping. Try again in 30 seconds or view the GitHub repo for status.';
       error.classList.remove('hidden');
       tempoStatic.classList.remove('hidden');
     } finally {
