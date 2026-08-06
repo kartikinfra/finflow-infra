@@ -34,17 +34,6 @@ spec:
             - name: WEBHOOK_URL
               value: "https://n8n.kartikinfra.in/"
 
-            - name: N8N_BASIC_AUTH_ACTIVE
-              value: "true"
-
-            - name: N8N_BASIC_AUTH_USER
-              value: "kartik"
-
-            - name:  N8N_BASIC_AUTH_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: n8n-auth
-                  key: password
           resources:
             requests:
               memory: "256Mi"
